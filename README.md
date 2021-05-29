@@ -4,7 +4,7 @@ Usage: <br>
 1. Wrap your components with the provider
 
 ```tsx
-  import { IoProvider } from 'socket.io-react-hooks';
+  import { IoProvider } from 'socket.io-react-hook';
 
   <IoProvider>
     <App />       
@@ -13,7 +13,7 @@ Usage: <br>
 
 2. 
 ```tsx
-  import { useSocket, useSocketEvent } from 'socket.io-react-hooks';
+  import { useSocket, useSocketEvent } from 'socket.io-react-hook';
 
   const { socket, connected } = useSocket();  
   const { lastMessage, error } = useSocketEvent(socket, 'message');
@@ -29,7 +29,7 @@ The connection for a namespace is shared between your components, feel free to u
 
 ```tsx
 import { useCookie } from 'react-use';
-import { useSocket } from 'socket.io-react-hooks';
+import { useSocket } from 'socket.io-react-hook';
 
 export const useAuthenticatedSocket = (namespace?: string) => {
   const [accessToken] = useCookie('jwt');
@@ -54,8 +54,16 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 const Index = () => {
 
   const { socket, connected } = useAuthenticatedSocket();
-  const { lastMessage, error } = useSocketEvent<string>(socket, 'randomNumber');
+  const { lastMessage, error } = useSocketEvent<string>(socket, 'eventName');
 
   return <div>{ lastMessage }</div>
 }
+```
+
+Emitting messages works as always:
+
+```tsx
+  const { socket, connected } = useSocket();
+  socket.emit('eventName', data);
+
 ```
