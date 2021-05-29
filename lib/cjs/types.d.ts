@@ -10,3 +10,7 @@ export declare type IoContextInterface<T extends Socket> = {
 export declare type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
     enabled?: boolean;
 } & I;
+export declare type UseSocketReturnType = {
+    socket: Socket;
+    connected: boolean;
+};

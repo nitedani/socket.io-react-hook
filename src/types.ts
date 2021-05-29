@@ -21,3 +21,8 @@ export type IoContextInterface<T extends Socket> = {
 export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
   enabled?: boolean;
 } & I;
+
+export type UseSocketReturnType = {
+  socket: Socket;
+  connected: boolean;
+};
