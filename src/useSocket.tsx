@@ -25,14 +25,13 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
     options: typeof namespace === "string" ? options : namespace,
   };
 
-  const enabled = options?.enabled === undefined || options.enabled;
+  const enabled = opts.options?.enabled === undefined || opts.options.enabled;
   const ioContext = React.useContext<IoContextInterface<T>>(IoContext);
   const existingConnection = ioContext.getConnection(opts.namespace);
   const [connected, setConnected] = React.useState<boolean>(false);
   const handleConnect = () => setConnected(true);
   const handleDisconnect = () => setConnected(false);
 
-  console.log(enabled);
   if (!existingConnection && enabled) {
     const socket = ioContext.createConnection(opts.namespace, opts.options);
     socket.on("connect", handleConnect);
