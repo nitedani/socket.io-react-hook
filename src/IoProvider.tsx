@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import io from "socket.io-client";
 import IoContext from "./IoContext";
 
@@ -11,18 +11,23 @@ import {
 
 const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
   const connections = useRef<Record<IoNamespace, IoConnection>>({});
-  const statuses = useRef<
+
+  const [statuses, setStatuses] = useState<
     Record<IoNamespace, "disconnected" | "connecting" | "connected">
   >({});
-  const lastMessages = useRef<Record<string, any>>({});
-  const errors = useRef<Record<string, any>>({});
+  const [lastMessages, setLastMessages] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, any>>({});
+
   const createConnection: CreateConnectionFunc<any> = (
     namespace = "",
     options = {}
   ) => {
-    const handleConnect = () => (statuses.current[namespace] = "connected");
+    const handleConnect = () =>
+      setStatuses((state) => ({ ...state, [namespace]: "connected" }));
+
     const handleDisconnect = () =>
-      (statuses.current[namespace] = "disconnected");
+      setStatuses((state) => ({ ...state, [namespace]: "disconnected" }));
+
     const connection = io(namespace, options);
     connections.current = Object.assign({}, connections.current, {
       [namespace]: connection,
@@ -31,18 +36,30 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
     connection.on("disconnect", handleDisconnect);
     return connection;
   };
+
   const getLastMessage = (namespace = "", forEvent = "") =>
-    lastMessages.current[`${namespace}${forEvent}`];
+    lastMessages[`${namespace}${forEvent}`];
   const setLastMessage = (namespace: string, forEvent: string, message: any) =>
-    (lastMessages.current[`${namespace}${forEvent}`] = message);
+    setLastMessages((state) => ({
+      ...state,
+      [`${namespace}${forEvent}`]: message,
+    }));
+
   const getConnection: GetConnectionFunc<any> = (namespace = "") =>
     connections.current[namespace];
-  const getStatus = (namespace = "") => statuses.current[namespace];
-  const getError = (namespace = "") => errors.current[namespace];
+  const getStatus = (namespace = "") => statuses[namespace];
+  const getError = (namespace = "") => errors[namespace];
   const setError = (namespace = "", error: any) =>
-    (errors.current[namespace] = error);
+    setErrors((state) => ({
+      ...state,
+      [namespace]: error,
+    }));
+
   const registerSharedListener = (namespace = "", forEvent = "") => {
-    if (!connections.current[namespace]?.hasListeners(forEvent)) {
+    if (
+      connections.current[namespace] &&
+      !connections.current[namespace].hasListeners(forEvent)
+    ) {
       connections.current[namespace].on(forEvent, (message) =>
         setLastMessage(namespace, forEvent, message)
       );
