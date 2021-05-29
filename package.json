@@ -1,13 +1,15 @@
 {
   "name": "socket.io-react-hooks",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
+  "main": "lib/cjs/index.js",
   "author": {
     "email": "nitedani@gmail.com",
     "name": "Horváth Dániel"
   },
   "keywords": [],
   "license": "ISC",
+  "typings": "./lib/cjs/index.d.ts",
   "scripts": {
     "build": "npm run build:esm && npm run  build:cjs",
     "build:esm": "tsc",
