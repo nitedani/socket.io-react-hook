@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
-export const useSocketEvent = <T extends unknown>(
-  socket: Socket,
-  event: string
-) => {
+const useSocketEvent = <T extends unknown>(socket: Socket, event: string) => {
   const [lastMessage, setLastMessage] = useState<T>();
   const [error, setError] = useState<any>();
   useEffect(() => {
@@ -18,3 +15,5 @@ export const useSocketEvent = <T extends unknown>(
 
   return { lastMessage, error };
 };
+
+export default useSocketEvent;
