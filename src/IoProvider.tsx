@@ -42,7 +42,7 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
   const setError = (namespace = "", error: any) =>
     (errors.current[namespace] = error);
   const registerSharedListener = (namespace = "", forEvent = "") => {
-    if (!connections.current[namespace].hasListeners(forEvent)) {
+    if (!connections.current[namespace]?.hasListeners(forEvent)) {
       connections.current[namespace].on(forEvent, (message) =>
         setLastMessage(namespace, forEvent, message)
       );
