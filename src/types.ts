@@ -31,4 +31,5 @@ export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
 export type UseSocketReturnType = {
   socket: Socket;
   connected: boolean;
+  error: any;
 };

@@ -26,10 +26,10 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   };
 
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
-  const { getStatus, createConnection, getConnection } =
+  const { getStatus, createConnection, getConnection, getError } =
     React.useContext<IoContextInterface<T>>(IoContext);
   const status = getStatus();
-
+  const error = getError(opts.namespace as any);
   const existingConnection = getConnection(opts.namespace);
   const [connected, setConnected] = React.useState<boolean>(false);
 
@@ -52,6 +52,7 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
     return {
       socket,
       connected,
+      error,
     };
   }
 
@@ -62,6 +63,7 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   return {
     socket,
     connected,
+    error,
   };
 }
 

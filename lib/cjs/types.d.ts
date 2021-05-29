@@ -19,4 +19,5 @@ export declare type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions
 export declare type UseSocketReturnType = {
     socket: Socket;
     connected: boolean;
+    error: any;
 };

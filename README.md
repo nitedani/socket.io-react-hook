@@ -15,13 +15,13 @@ Usage: <br>
 ```tsx
   import { useSocket, useSocketEvent } from 'socket.io-react-hook';
 
-  const { socket, connected } = useSocket();  
-  const { lastMessage, error } = useSocketEvent(socket, 'message');
+  const { socket, error } = useSocket();  
+  const { socket, lastMessage, sendMessage } = useSocketEvent(socket, 'message');
 
 ```
 
 useSocket forwards all parameters to socket.io constructor.<br>
-
+See the available options [here](https://socket.io/docs/v4/client-initialization/)
 
 If the socket connection depends on state, use it like this: <br>
 The connection will be initiated once the socket is enabled.<br>
@@ -40,7 +40,7 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 
 ```
 
-The useSocket hook always returns a socket-like object, so you don't have to worry about errors caused by undefined values.<br>
+The useSocket hook always returns a socket-like object, even before a succesful connection. You don't have to check whether is is undefined.<br>
 
 Example:
 
@@ -53,17 +53,25 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 };
 const Index = () => {
 
-  const { socket, connected } = useAuthenticatedSocket();
-  const { lastMessage, error } = useSocketEvent<string>(socket, 'eventName');
+  const { socket, connected, error } = useAuthenticatedSocket();
+  const { socket, lastMessage, sendMessage } = useSocketEvent<string>(socket, 'eventName');
 
   return <div>{ lastMessage }</div>
 }
 ```
 
+useSocketEvent will immediately return the last available value of lastMessage even on newly mounted components.
+
 Emitting messages works as always:
 
 ```tsx
-  const { socket, connected } = useSocket();
+  const { socket, connected, error } = useSocket();
   socket.emit('eventName', data);
+
+```
+Or by calling sendMessage
+```tsx
+  const { socket, lastMessage, sendMessage } = useSocketEvent<string>(socket, 'eventName');
+  sendMessage(data);
 
 ```
