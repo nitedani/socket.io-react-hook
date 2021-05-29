@@ -7,9 +7,6 @@ export declare type IoContextInterface<T extends Socket> = {
     createConnection: CreateConnectionFunc<T>;
     getConnection: GetConnectionFunc<T>;
 };
-export declare type UseSocket<I> = {
-    namespace?: IoNamespace;
-    options?: Partial<ManagerOptions & SocketOptions> & {
-        enabled?: boolean;
-    } & I;
-};
+export declare type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
+    enabled?: boolean;
+} & I;

@@ -1,17 +1,14 @@
 import * as React from "react";
 import { Socket } from "socket.io-client";
-
 import IoContext from "./IoContext";
-import { IoContextInterface, UseSocket } from "./types";
+import { IoContextInterface, IoNamespace, UseSocketOptions } from "./types";
 import SocketMock from "socket.io-mock";
 
 const useSocket = function <
   I extends Record<string, any>,
   T extends Socket = Socket
->(args?: UseSocket<I>) {
-  const namespace = args && args.namespace;
-  const options = args && args.options;
-  const enabled = args?.options?.enabled === undefined || args.options.enabled;
+>(namespace?: IoNamespace, options?: UseSocketOptions<I>) {
+  const enabled = options?.enabled === undefined || options.enabled;
   const ioContext = React.useContext<IoContextInterface<T>>(IoContext);
   const existingConnection = ioContext.getConnection(namespace);
   const [connected, setConnected] = React.useState<boolean>(false);
@@ -45,4 +42,3 @@ const useSocket = function <
 };
 
 export default useSocket;
-useSocket();

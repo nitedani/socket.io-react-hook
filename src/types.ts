@@ -18,7 +18,6 @@ export type IoContextInterface<T extends Socket> = {
   getConnection: GetConnectionFunc<T>;
 };
 
-export type UseSocket<I> = {
-  namespace?: IoNamespace;
-  options?: Partial<ManagerOptions & SocketOptions> & { enabled?: boolean } & I;
-};
+export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
+  enabled?: boolean;
+} & I;
