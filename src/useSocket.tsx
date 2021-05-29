@@ -11,16 +11,36 @@ const useSocket = function <
 >(args?: UseSocket<I>) {
   const namespace = args && args.namespace;
   const options = args && args.options;
+  const enabled = args?.options?.enabled === undefined || args.options.enabled;
   const ioContext = React.useContext<IoContextInterface<T>>(IoContext);
   const existingConnection = ioContext.getConnection(namespace);
+  const [connected, setConnected] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (existingConnection) {
+      existingConnection.on("connect", () =>
+        setConnected(existingConnection.connected)
+      );
+      existingConnection.on("disconnect", () =>
+        setConnected(existingConnection.connected)
+      );
+    }
+  }, [existingConnection]);
 
   if (!existingConnection) {
-    return ioContext.createConnection(namespace, options);
+    return {
+      socket: enabled
+        ? ioContext.createConnection(namespace, options)
+        : (new SocketMock() as Socket),
+      connected,
+    };
   }
 
   return {
-    socket: existingConnection || (new SocketMock() as Socket),
-    connected: !!existingConnection,
+    socket: enabled
+      ? existingConnection || (new SocketMock() as Socket)
+      : (new SocketMock() as Socket),
+    connected,
   };
 };
 
