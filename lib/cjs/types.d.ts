@@ -9,5 +9,7 @@ export declare type IoContextInterface<T extends Socket> = {
 };
 export declare type UseSocket<I> = {
     namespace: IoNamespace;
-    options?: Partial<ManagerOptions & SocketOptions> & I;
+    options?: Partial<ManagerOptions & SocketOptions> & {
+        enabled?: boolean;
+    } & I;
 };
