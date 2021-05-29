@@ -3,7 +3,7 @@ React hooks for socket.io 4.x
 Usage: <br>
 1. Wrap your components with the provider
 
-```
+```tsx
   import { IoProvider } from 'socket.io-react-hooks';
 
   <IoProvider>
@@ -12,7 +12,7 @@ Usage: <br>
 ```
 
 2. 
-```
+```tsx
   import { useSocket, useSocketEvent } from 'socket.io-react-hooks';
 
   const { socket, connected } = useSocket();  
@@ -27,7 +27,7 @@ If the socket connection depends on state, use it like this: <br>
 The connection will be initiated once the socket is enabled.<br>
 The connection for a namespace is shared between your components, feel free to use the hooks in multiple components.
 
-```
+```tsx
 import { useCookie } from 'react-use';
 import { useSocket } from 'socket.io-react-hooks';
 
@@ -38,15 +38,13 @@ export const useAuthenticatedSocket = (namespace?: string) => {
   });
 };
 
-
 ```
 
 The useSocket hook always returns a socket-like object, so you don't have to worry about errors caused by undefined values.<br>
 
 Example:
 
-```
-
+```tsx
 export const useAuthenticatedSocket = (namespace?: string) => {
   const [accessToken] = useCookie('jwt');
   return useSocket(namespace, {
