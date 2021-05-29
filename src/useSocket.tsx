@@ -29,23 +29,17 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   const ioContext = React.useContext<IoContextInterface<T>>(IoContext);
   const existingConnection = ioContext.getConnection(opts.namespace);
   const [connected, setConnected] = React.useState<boolean>(false);
-
-  React.useEffect(() => {
-    if (existingConnection) {
-      existingConnection.on("connect", () =>
-        setConnected(existingConnection.connected)
-      );
-      existingConnection.on("disconnect", () =>
-        setConnected(existingConnection.connected)
-      );
-    }
-  }, [existingConnection]);
+  const handleConnect = () => setConnected(true);
+  const handleDisconnect = () => setConnected(false);
 
   if (!existingConnection) {
+    const socket = enabled
+      ? ioContext.createConnection(opts.namespace, opts.options)
+      : (new SocketMock() as Socket);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
     return {
-      socket: enabled
-        ? ioContext.createConnection(opts.namespace, opts.options)
-        : (new SocketMock() as Socket),
+      socket: enabled ? socket : (new SocketMock() as Socket),
       connected,
     };
   }
