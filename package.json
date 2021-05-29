@@ -7,8 +7,17 @@
     "email": "nitedani@gmail.com",
     "name": "Horváth Dániel"
   },
-  "keywords": [],
+  "keywords": [
+    "socket.io",
+    "socket",
+    "react",
+    "hooks"
+  ],
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nitedani/socket.io-react-hooks.git"
+  },
   "typings": "./lib/cjs/index.d.ts",
   "scripts": {
     "build": "npm run build:esm && npm run  build:cjs",
