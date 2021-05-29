@@ -32,6 +32,7 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
     connections.current = Object.assign({}, connections.current, {
       [namespace]: connection,
     });
+    connection.on("error", (error) => setError(namespace, error));
     connection.on("connect", handleConnect);
     connection.on("disconnect", handleDisconnect);
     return connection;
@@ -62,9 +63,6 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
     ) {
       connections.current[namespace].on(forEvent, (message) =>
         setLastMessage(namespace, forEvent, message)
-      );
-      connections.current[namespace].on("error", (error) =>
-        setError(namespace, error)
       );
     }
   };
