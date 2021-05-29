@@ -1,14 +1,20 @@
 React hooks for socket.io 4.x
-
-Usage:
-
-```
-          <IoProvider>
-              <App />       
-          </IoProvider>
-```
+---
+Usage: <br>
+1. Wrap your components with the provider
 
 ```
+  import { IoProvider } from 'socket.io-react-hooks';
+
+  <IoProvider>
+    <App />       
+  </IoProvider>
+```
+
+2. 
+```
+  import { useSocket, useSocketEvent } from 'socket.io-react-hooks';
+
   const { socket, connected } = useSocket();  
   const { lastMessage, error } = useSocketEvent(socket, 'message');
 
@@ -16,7 +22,7 @@ Usage:
 
 useSocket forwards all parameters to socket.io constructor.
 
-If the socket connection depends on state, use it like this:
+If the socket connection depends on state, use it like this: <br>
 The connection will be initiated once the socket is enabled.
 
 ```
@@ -33,7 +39,8 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 
 ```
 
-The useSocket hook always returns a socket-like object, so you don't have to worry about errors caused by undefined values.
+The useSocket hook always returns a socket-like object, so you don't have to worry about errors caused by undefined values.<br>
+
 Example:
 
 ```
