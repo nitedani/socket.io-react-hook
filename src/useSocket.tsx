@@ -32,14 +32,13 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   const handleConnect = () => setConnected(true);
   const handleDisconnect = () => setConnected(false);
 
-  if (!existingConnection) {
-    const socket = enabled
-      ? ioContext.createConnection(opts.namespace, opts.options)
-      : (new SocketMock() as Socket);
+  console.log(enabled);
+  if (!existingConnection && enabled) {
+    const socket = ioContext.createConnection(opts.namespace, opts.options);
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     return {
-      socket: enabled ? socket : (new SocketMock() as Socket),
+      socket,
       connected,
     };
   }
