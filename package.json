@@ -1,8 +1,7 @@
 {
   "name": "socket.io-react-hooks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "lib/index.js",
   "author": {
     "email": "nitedani@gmail.com",
     "name": "Horváth Dániel"
