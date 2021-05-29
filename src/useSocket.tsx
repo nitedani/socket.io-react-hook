@@ -26,26 +26,41 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   };
 
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
-  const ioContext = React.useContext<IoContextInterface<T>>(IoContext);
-  const existingConnection = ioContext.getConnection(opts.namespace);
+  const { getStatus, createConnection, getConnection } =
+    React.useContext<IoContextInterface<T>>(IoContext);
+  const status = getStatus();
+
+  const existingConnection = getConnection(opts.namespace);
   const [connected, setConnected] = React.useState<boolean>(false);
-  const handleConnect = () => setConnected(true);
-  const handleDisconnect = () => setConnected(false);
+
+  React.useEffect(() => {
+    switch (status) {
+      case "connected":
+        setConnected(true);
+        break;
+      case "disconnected":
+        setConnected(false);
+        break;
+      default:
+        break;
+    }
+  }, [status]);
 
   if (!existingConnection && enabled) {
-    const socket = ioContext.createConnection(opts.namespace, opts.options);
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
+    const socket = createConnection(opts.namespace, opts.options);
+    (socket as any).namespace = opts.namespace;
     return {
       socket,
       connected,
     };
   }
 
+  const socket = enabled
+    ? existingConnection || (new SocketMock() as Socket)
+    : (new SocketMock() as Socket);
+  (socket as any).namespace = opts.namespace;
   return {
-    socket: enabled
-      ? existingConnection || (new SocketMock() as Socket)
-      : (new SocketMock() as Socket),
+    socket,
     connected,
   };
 }

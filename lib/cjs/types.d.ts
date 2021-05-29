@@ -6,6 +6,12 @@ export declare type GetConnectionFunc<T extends Socket> = (namespace?: IoNamespa
 export declare type IoContextInterface<T extends Socket> = {
     createConnection: CreateConnectionFunc<T>;
     getConnection: GetConnectionFunc<T>;
+    getLastMessage: (namespace: string, forEvent: string) => any;
+    setLastMessage: (namespace: string, forEvent: string, message: any) => void;
+    registerSharedListener: (namespace: string, forEvent: string) => void;
+    getError: (namespace: string) => any;
+    setError: (namespace: string, error: any) => void;
+    getStatus: () => "connecting" | "connected" | "disconnected";
 };
 export declare type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
     enabled?: boolean;
