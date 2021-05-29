@@ -40,7 +40,7 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 
 ```
 
-The useSocket hook always returns a socket-like object, even before a succesful connection. You don't have to check whether is is undefined.<br>
+The useSocket hook always returns a socket-like object, even before a succesful connection. You don't have to check whether it is undefined.<br>
 
 Example:
 
@@ -54,7 +54,8 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 const Index = () => {
 
   const { socket, connected, error } = useAuthenticatedSocket();
-  const { socket, lastMessage, sendMessage } = useSocketEvent<string>(socket, 'eventName');
+  const { socket, lastMessage, sendMessage } = 
+    useSocketEvent<string>(socket, 'eventName');
 
   return <div>{ lastMessage }</div>
 }
