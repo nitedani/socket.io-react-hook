@@ -20,10 +20,12 @@ Usage: <br>
 
 ```
 
-useSocket forwards all parameters to socket.io constructor.
+useSocket forwards all parameters to socket.io constructor.<br>
+
 
 If the socket connection depends on state, use it like this: <br>
-The connection will be initiated once the socket is enabled.
+The connection will be initiated once the socket is enabled.<br>
+The connection for a namespace is shared between your components, feel free to use the hooks in multiple components.
 
 ```
 import { useCookie } from 'react-use';
