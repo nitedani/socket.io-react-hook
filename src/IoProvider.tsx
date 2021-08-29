@@ -7,10 +7,12 @@ import {
   IoConnection,
   IoNamespace,
   GetConnectionFunc,
+  SocketLikeWithNamespace,
 } from "./types";
 
 const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
-  const connections = useRef<Record<IoNamespace, IoConnection>>({});
+  const connections = useRef<Record<string, number>>({});
+  const sockets = useRef<Record<IoNamespace, IoConnection>>({});
 
   const [statuses, setStatuses] = useState<
     Record<IoNamespace, "disconnected" | "connecting" | "connected">
@@ -19,50 +21,84 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
   const [errors, setErrors] = useState<Record<string, any>>({});
 
   const createConnection: CreateConnectionFunc<any> = (
-    namespace = "",
+    urlConfig,
     options = {}
   ) => {
+    const connectionKey = urlConfig.id;
+
+    if (!(connectionKey in connections.current)) {
+      connections.current[connectionKey] = 1;
+    } else {
+      connections.current[connectionKey] += 1;
+    }
+
+    const cleanup = () => {
+      if (--connections.current[connectionKey] === 0) {
+        const socketsToClose = Object.keys(sockets.current).filter((key) =>
+          key.includes(connectionKey)
+        );
+
+        for (const key of socketsToClose) {
+          sockets.current[key].disconnect();
+          delete sockets.current[key];
+        }
+      }
+    };
+
+    const namespaceKey = `${connectionKey}${urlConfig.path}`;
+
+    // By default socket.io-client creates a new connection for the same namespace
+    // The next line prevents that
+    if (sockets.current[namespaceKey]) {
+      return { socket: sockets.current[namespaceKey], cleanup };
+    }
     const handleConnect = () =>
-      setStatuses((state) => ({ ...state, [namespace]: "connected" }));
+      setStatuses((state) => ({ ...state, [namespaceKey]: "connected" }));
 
     const handleDisconnect = () =>
-      setStatuses((state) => ({ ...state, [namespace]: "disconnected" }));
+      setStatuses((state) => ({ ...state, [namespaceKey]: "disconnected" }));
 
-    const connection = io(namespace, options);
-    connections.current = Object.assign({}, connections.current, {
-      [namespace]: connection,
+    const socket = io(urlConfig.source, options) as SocketLikeWithNamespace;
+    socket.namespaceKey = namespaceKey;
+
+    sockets.current = Object.assign({}, sockets.current, {
+      [namespaceKey]: socket,
     });
-    connection.on("error", (error) => setError(namespace, error));
-    connection.on("connect", handleConnect);
-    connection.on("disconnect", handleDisconnect);
-    return connection;
+    socket.on("error", (error) => setError(namespaceKey, error));
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    return { socket, cleanup };
   };
 
-  const getLastMessage = (namespace = "", forEvent = "") =>
-    lastMessages[`${namespace}${forEvent}`];
-  const setLastMessage = (namespace: string, forEvent: string, message: any) =>
+  const getLastMessage = (namespaceKey = "", forEvent = "") =>
+    lastMessages[`${namespaceKey}${forEvent}`];
+  const setLastMessage = (
+    namespaceKey: string,
+    forEvent: string,
+    message: any
+  ) =>
     setLastMessages((state) => ({
       ...state,
-      [`${namespace}${forEvent}`]: message,
+      [`${namespaceKey}${forEvent}`]: message,
     }));
 
   const getConnection: GetConnectionFunc<any> = (namespace = "") =>
-    connections.current[namespace];
-  const getStatus = (namespace = "") => statuses[namespace];
-  const getError = (namespace = "") => errors[namespace];
-  const setError = (namespace = "", error: any) =>
+    sockets.current[namespace];
+  const getStatus = (namespaceKey = "") => statuses[namespaceKey];
+  const getError = (namespaceKey = "") => errors[namespaceKey];
+  const setError = (namespaceKey = "", error: any) =>
     setErrors((state) => ({
       ...state,
-      [namespace]: error,
+      [namespaceKey]: error,
     }));
 
-  const registerSharedListener = (namespace = "", forEvent = "") => {
+  const registerSharedListener = (namespaceKey = "", forEvent = "") => {
     if (
-      connections.current[namespace] &&
-      !connections.current[namespace].hasListeners(forEvent)
+      sockets.current[namespaceKey] &&
+      !sockets.current[namespaceKey].hasListeners(forEvent)
     ) {
-      connections.current[namespace].on(forEvent, (message) =>
-        setLastMessage(namespace, forEvent, message)
+      sockets.current[namespaceKey].on(forEvent, (message) =>
+        setLastMessage(namespaceKey, forEvent, message)
       );
     }
   };

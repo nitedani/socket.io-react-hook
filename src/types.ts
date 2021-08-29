@@ -1,13 +1,22 @@
 import { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
-
+import { url } from "socket.io-client/build/url";
 export type IoNamespace = string;
 
 export type IoConnection = Socket;
 
-export type CreateConnectionFunc<T extends Socket> = (
-  namespace?: string,
+export type SocketLikeWithNamespace<T extends Socket = Socket> = T & {
+  namespaceKey: string;
+};
+
+export type CreateConnectionFuncReturnType<T extends Socket = Socket> = {
+  socket: SocketLikeWithNamespace<T>;
+  cleanup: () => void;
+};
+
+export type CreateConnectionFunc<T extends Socket = Socket> = (
+  urlConfig: ReturnType<typeof url>,
   options?: Partial<ManagerOptions & SocketOptions> | undefined
-) => T;
+) => CreateConnectionFuncReturnType<T> | undefined;
 
 export type GetConnectionFunc<T extends Socket> = (
   namespace?: IoNamespace
@@ -21,7 +30,7 @@ export type IoContextInterface<T extends Socket> = {
   registerSharedListener: (namespace: string, forEvent: string) => void;
   getError: (namespace: string) => any;
   setError: (namespace: string, error: any) => void;
-  getStatus: () => "connecting" | "connected" | "disconnected";
+  getStatus: (namespace: string) => "connecting" | "connected" | "disconnected";
 };
 
 export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
@@ -29,7 +38,7 @@ export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
 } & I;
 
 export type UseSocketReturnType = {
-  socket: Socket;
+  socket: SocketLikeWithNamespace;
   connected: boolean;
   error: any;
 };
