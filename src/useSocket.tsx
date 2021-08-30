@@ -26,13 +26,15 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
   };
+  const urlConfig = url(opts.namespace, opts.options?.path || "/socket.io");
+  const connectionKey = urlConfig.id;
+  const namespaceKey = `${connectionKey}${urlConfig.path}`;
 
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
-  const { getStatus, createConnection, getConnection, getError } =
+  const { getStatus, createConnection, getError } =
     React.useContext<IoContextInterface<SocketLikeWithNamespace<T>>>(IoContext);
-  const status = getStatus(opts.namespace);
-  const error = getError(opts.namespace);
-  const existingConnection = getConnection(opts.namespace);
+  const status = getStatus(namespaceKey);
+  const error = getError(namespaceKey);
   const [socket, setSocket] = React.useState<SocketLikeWithNamespace>(
     new SocketMock()
   );
@@ -52,8 +54,7 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   }, [status]);
 
   React.useEffect(() => {
-    if (!existingConnection && enabled) {
-      const urlConfig = url(opts.namespace, opts.options?.path || "/socket.io");
+    if (enabled) {
       const { socket: _socket, cleanup } = createConnection(
         urlConfig,
         opts.options
@@ -64,7 +65,7 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
       };
     }
     return () => {};
-  }, [existingConnection, enabled]);
+  }, [enabled]);
 
   return {
     socket,

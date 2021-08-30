@@ -50,6 +50,7 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
     // By default socket.io-client creates a new connection for the same namespace
     // The next line prevents that
     if (sockets.current[namespaceKey]) {
+      sockets.current[namespaceKey].connect();
       return { socket: sockets.current[namespaceKey], cleanup };
     }
     const handleConnect = () =>
@@ -82,8 +83,8 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
       [`${namespaceKey}${forEvent}`]: message,
     }));
 
-  const getConnection: GetConnectionFunc<any> = (namespace = "") =>
-    sockets.current[namespace];
+  const getConnection: GetConnectionFunc<any> = (namespaceKey = "") =>
+    sockets.current[namespaceKey];
   const getStatus = (namespaceKey = "") => statuses[namespaceKey];
   const getError = (namespaceKey = "") => errors[namespaceKey];
   const setError = (namespaceKey = "", error: any) =>
