@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Socket } from "socket.io-client";
-import { url } from "socket.io-client/build/url";
+import { url } from "./utils/url";
 import IoContext from "./IoContext";
 import {
   IoContextInterface,
