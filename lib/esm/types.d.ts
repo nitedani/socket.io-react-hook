@@ -1,5 +1,5 @@
 import { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
-import { url } from "socket.io-client/build/url";
+import { url } from "./utils/url";
 export declare type IoNamespace = string;
 export declare type IoConnection = Socket;
 export declare type SocketLikeWithNamespace<T extends Socket = Socket> = T & {

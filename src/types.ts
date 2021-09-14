@@ -1,5 +1,5 @@
 import { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
-import { url } from "socket.io-client/build/url";
+import { url } from "./utils/url";
 export type IoNamespace = string;
 
 export type IoConnection = Socket;
