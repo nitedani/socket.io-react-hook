@@ -54,7 +54,7 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   }, [status]);
 
   React.useEffect(() => {
-    if (enabled) {
+    if (enabled && typeof window !== "undefined") {
       const { socket: _socket, cleanup } = createConnection(
         urlConfig,
         opts.options
