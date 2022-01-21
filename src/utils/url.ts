@@ -41,7 +41,7 @@ export function url(
   let obj = uri as ParsedUrl;
 
   // default to window.location
-  loc = loc || window.location;
+  loc = loc || globalThis.location;
   if (null == uri) uri = loc.protocol + "//" + loc.host;
 
   // relative path support
