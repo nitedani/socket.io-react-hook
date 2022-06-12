@@ -37,8 +37,8 @@ export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
   enabled?: boolean;
 } & I;
 
-export type UseSocketReturnType = {
-  socket: SocketLikeWithNamespace;
+export type UseSocketReturnType<T extends Socket> = {
+  socket: SocketLikeWithNamespace<T>;
   connected: boolean;
   error: any;
 };

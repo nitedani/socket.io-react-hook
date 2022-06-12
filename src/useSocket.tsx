@@ -13,15 +13,15 @@ import SocketMock from "socket.io-mock";
 
 function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   options?: UseSocketOptions<I>
-): UseSocketReturnType;
+): UseSocketReturnType<T>;
 function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   namespace: IoNamespace,
   options?: UseSocketOptions<I>
-): UseSocketReturnType;
+): UseSocketReturnType<T>;
 function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   namespace?: string | UseSocketOptions<I>,
   options?: UseSocketOptions<I>
-): UseSocketReturnType {
+): UseSocketReturnType<T> {
   const opts = {
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
@@ -35,7 +35,7 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
     React.useContext<IoContextInterface<SocketLikeWithNamespace<T>>>(IoContext);
   const status = getStatus(namespaceKey);
   const error = getError(namespaceKey);
-  const [socket, setSocket] = React.useState<SocketLikeWithNamespace>(
+  const [socket, setSocket] = React.useState<SocketLikeWithNamespace<T>>(
     new SocketMock()
   );
   const [connected, setConnected] = React.useState<boolean>(false);
