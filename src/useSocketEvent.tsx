@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { Socket } from "socket.io-client";
-import { IoContext } from ".";
+import IoContext from "./IoContext";
 import { IoContextInterface, SocketLikeWithNamespace } from "./types";
 
 const useSocketEvent = <T extends unknown>(
