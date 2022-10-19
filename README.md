@@ -16,7 +16,7 @@ Usage: <br>
   import { useSocket, useSocketEvent } from 'socket.io-react-hook';
 
   const { socket, error } = useSocket();  
-  const { socket, lastMessage, sendMessage } = useSocketEvent(socket, 'message');
+  const { lastMessage, sendMessage } = useSocketEvent(socket, 'message');
 
 ```
 
@@ -54,7 +54,7 @@ export const useAuthenticatedSocket = (namespace?: string) => {
 const Index = () => {
 
   const { socket, connected, error } = useAuthenticatedSocket();
-  const { socket, lastMessage, sendMessage } = 
+  const { lastMessage, sendMessage } = 
     useSocketEvent<string>(socket, 'eventName');
 
   return <div>{ lastMessage }</div>
