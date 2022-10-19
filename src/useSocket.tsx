@@ -1,15 +1,15 @@
-import * as React from "react";
 import { Socket } from "socket.io-client";
 import { url } from "./utils/url";
 import IoContext from "./IoContext";
 import {
   IoContextInterface,
   IoNamespace,
-  SocketLikeWithNamespace,
+  SocketLike,
   UseSocketOptions,
   UseSocketReturnType,
 } from "./types";
 import SocketMock from "socket.io-mock";
+import { useContext, useEffect, useRef, useState } from "react";
 
 function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   options?: UseSocketOptions<I>
@@ -31,36 +31,52 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   const namespaceKey = `${connectionKey}${urlConfig.path}`;
 
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
-  const { getStatus, createConnection, getError } =
-    React.useContext<IoContextInterface<SocketLikeWithNamespace<T>>>(IoContext);
-  const status = getStatus(namespaceKey);
-  const error = getError(namespaceKey);
-  const [socket, setSocket] = React.useState<SocketLikeWithNamespace<T>>(
-    new SocketMock()
-  );
-  const [connected, setConnected] = React.useState<boolean>(false);
+  const { createConnection, getConnection } =
+    useContext<IoContextInterface<SocketLike<T>>>(IoContext);
 
-  React.useEffect(() => {
-    switch (status) {
-      case "connected":
-        setConnected(true);
-        break;
-      case "disconnected":
-        setConnected(false);
-        break;
-      default:
-        break;
-    }
-  }, [status]);
+  const connection = getConnection(namespaceKey);
 
-  React.useEffect(() => {
+  const state = useRef<{
+    socket: SocketLike<T>;
+    status: "connecting" | "connected" | "disconnected";
+    error: Error | null;
+  }>({
+    socket: new SocketMock(),
+    status: connection?.state.status || "disconnected",
+    error: null,
+  });
+
+  const [, rerender] = useState({});
+  const connected = state.current.status === "connected";
+
+  useEffect(() => {
     if (enabled && typeof window !== "undefined") {
-      const { socket: _socket, cleanup } = createConnection(
-        urlConfig,
-        opts.options
-      )!;
-      setSocket(_socket);
+      const {
+        socket: _socket,
+        cleanup,
+        subscribe,
+      } = createConnection(urlConfig, opts.options)!;
+      state.current.socket = _socket;
+
+      const unsubscribe = subscribe((newState) => {
+        let changed = false;
+        if (state.current.status !== newState.status) {
+          state.current.status = newState.status;
+          changed = true;
+        }
+        if (state.current.error !== newState.error) {
+          state.current.error = newState.error;
+          changed = true;
+        }
+        if (changed) {
+          rerender({});
+        }
+      });
+
+      rerender({});
+
       return () => {
+        unsubscribe();
         cleanup();
       };
     }
@@ -68,9 +84,9 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
   }, [enabled]);
 
   return {
-    socket,
+    socket: state.current.socket,
+    error: state.current.error,
     connected,
-    error,
   };
 }
 

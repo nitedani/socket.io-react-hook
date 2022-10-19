@@ -1,6 +1,6 @@
 {
   "name": "socket.io-react-hook",
-  "version": "1.0.17",
+  "version": "2.0.0",
   "description": "",
   "main": "lib/cjs/index.js",
   "author": {

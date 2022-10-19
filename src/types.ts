@@ -4,33 +4,41 @@ export type IoNamespace = string;
 
 export type IoConnection = Socket;
 
-export type SocketLikeWithNamespace<T extends Socket = Socket> = T & {
+export type SocketLike<T extends Socket = Socket> = T & {
   namespaceKey: string;
 };
 
-export type CreateConnectionFuncReturnType<T extends Socket = Socket> = {
-  socket: SocketLikeWithNamespace<T>;
-  cleanup: () => void;
+export type SocketState = {
+  state: {
+    status: "disconnected" | "connecting" | "connected";
+    error: Error | null;
+    lastMessage: Record<string, any>;
+  };
+  notify: () => void;
+  subscribe: (callback: (state: SocketState["state"]) => void) => () => void;
+  subscribers: Set<(state: SocketState["state"]) => void>;
 };
+
+export type CreateConnectionFuncReturnType<T extends Socket = Socket> = {
+  socket: SocketLike<T>;
+  cleanup: () => void;
+} & SocketState;
 
 export type CreateConnectionFunc<T extends Socket = Socket> = (
   urlConfig: ReturnType<typeof url>,
   options?: Partial<ManagerOptions & SocketOptions> | undefined
 ) => CreateConnectionFuncReturnType<T> | undefined;
 
-export type GetConnectionFunc<T extends Socket> = (
-  namespace?: IoNamespace
-) => T | undefined;
+export type GetConnectionFunc<T extends Socket> = (namespace?: IoNamespace) =>
+  | ({
+      socket: T;
+    } & SocketState)
+  | undefined;
 
 export type IoContextInterface<T extends Socket> = {
   createConnection: CreateConnectionFunc<T>;
   getConnection: GetConnectionFunc<T>;
-  getLastMessage: (namespace: string, forEvent: string) => any;
-  setLastMessage: (namespace: string, forEvent: string, message: any) => void;
   registerSharedListener: (namespace: string, forEvent: string) => void;
-  getError: (namespace: string) => any;
-  setError: (namespace: string, error: any) => void;
-  getStatus: (namespace: string) => "connecting" | "connected" | "disconnected";
 };
 
 export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
@@ -38,7 +46,7 @@ export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
 } & I;
 
 export type UseSocketReturnType<T extends Socket> = {
-  socket: SocketLikeWithNamespace<T>;
+  socket: SocketLike<T>;
   connected: boolean;
   error: any;
 };

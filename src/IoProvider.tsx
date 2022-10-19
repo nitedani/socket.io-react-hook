@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import io from "socket.io-client";
 import IoContext from "./IoContext";
 
@@ -7,18 +7,20 @@ import {
   IoConnection,
   IoNamespace,
   GetConnectionFunc,
-  SocketLikeWithNamespace,
+  SocketLike,
+  SocketState,
 } from "./types";
 
 const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
   const connections = useRef<Record<string, number>>({});
-  const sockets = useRef<Record<IoNamespace, IoConnection>>({});
-
-  const [statuses, setStatuses] = useState<
-    Record<IoNamespace, "disconnected" | "connecting" | "connected">
+  const sockets = useRef<
+    Record<
+      IoNamespace,
+      {
+        socket: IoConnection;
+      } & SocketState
+    >
   >({});
-  const [lastMessages, setLastMessages] = useState<Record<string, any>>({});
-  const [errors, setErrors] = useState<Record<string, any>>({});
 
   const createConnection: CreateConnectionFunc<any> = (
     urlConfig,
@@ -39,7 +41,8 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
         );
 
         for (const key of socketsToClose) {
-          sockets.current[key].disconnect();
+          sockets.current[key].socket.disconnect();
+          sockets.current[key].subscribers.clear();
           delete sockets.current[key];
         }
       }
@@ -50,57 +53,74 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
     // By default socket.io-client creates a new connection for the same namespace
     // The next line prevents that
     if (sockets.current[namespaceKey]) {
-      sockets.current[namespaceKey].connect();
-      return { socket: sockets.current[namespaceKey], cleanup };
+      sockets.current[namespaceKey].socket.connect();
+      return {
+        cleanup,
+        ...sockets.current[namespaceKey],
+      };
     }
-    const handleConnect = () =>
-      setStatuses((state) => ({ ...state, [namespaceKey]: "connected" }));
 
-    const handleDisconnect = () =>
-      setStatuses((state) => ({ ...state, [namespaceKey]: "disconnected" }));
+    const handleConnect = () => {
+      sockets.current[namespaceKey].state.status = "connected";
+      sockets.current[namespaceKey].notify();
+    };
 
-    const socket = io(urlConfig.source, options) as SocketLikeWithNamespace;
+    const handleDisconnect = () => {
+      sockets.current[namespaceKey].state.status = "disconnected";
+      sockets.current[namespaceKey].notify();
+    };
+
+    const socket = io(urlConfig.source, options) as SocketLike;
     socket.namespaceKey = namespaceKey;
 
     sockets.current = Object.assign({}, sockets.current, {
-      [namespaceKey]: socket,
+      [namespaceKey]: {
+        socket,
+        state: {
+          status: "disconnected",
+          lastMessage: {},
+          error: null,
+        },
+        notify: () => {
+          sockets.current[namespaceKey].subscribers.forEach((callback) =>
+            callback(sockets.current[namespaceKey].state)
+          );
+        },
+        subscribers: new Set(),
+        subscribe: (callback) => {
+          sockets.current[namespaceKey].subscribers.add(callback);
+          return () =>
+            sockets.current[namespaceKey].subscribers.delete(callback);
+        },
+      },
     });
-    socket.on("error", (error) => setError(namespaceKey, error));
+
+    socket.on("error", (error) => {
+      sockets.current[namespaceKey].state.error = error;
+      sockets.current[namespaceKey].notify();
+    });
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
-    return { socket, cleanup };
-  };
 
-  const getLastMessage = (namespaceKey = "", forEvent = "") =>
-    lastMessages[`${namespaceKey}${forEvent}`];
-  const setLastMessage = (
-    namespaceKey: string,
-    forEvent: string,
-    message: any
-  ) =>
-    setLastMessages((state) => ({
-      ...state,
-      [`${namespaceKey}${forEvent}`]: message,
-    }));
+    return {
+      cleanup,
+      ...sockets.current[namespaceKey],
+    };
+  };
 
   const getConnection: GetConnectionFunc<any> = (namespaceKey = "") =>
     sockets.current[namespaceKey];
-  const getStatus = (namespaceKey = "") => statuses[namespaceKey];
-  const getError = (namespaceKey = "") => errors[namespaceKey];
-  const setError = (namespaceKey = "", error: any) =>
-    setErrors((state) => ({
-      ...state,
-      [namespaceKey]: error,
-    }));
 
   const registerSharedListener = (namespaceKey = "", forEvent = "") => {
     if (
       sockets.current[namespaceKey] &&
-      !sockets.current[namespaceKey].hasListeners(forEvent)
+      !sockets.current[namespaceKey].socket.hasListeners(forEvent)
     ) {
-      sockets.current[namespaceKey].on(forEvent, (message) =>
-        setLastMessage(namespaceKey, forEvent, message)
-      );
+      sockets.current[namespaceKey].socket.on(forEvent, (message) => {
+        sockets.current[namespaceKey].state.lastMessage[forEvent] = message;
+        sockets.current[namespaceKey].notify();
+      });
     }
   };
 
@@ -109,11 +129,6 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
       value={{
         createConnection,
         getConnection,
-        getLastMessage,
-        setLastMessage,
-        getError,
-        setError,
-        getStatus,
         registerSharedListener,
       }}
     >
