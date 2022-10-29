@@ -5,7 +5,7 @@ import { IoContextInterface } from "./types";
 const IoContext = React.createContext<IoContextInterface<any>>({
   createConnection: () => undefined,
   getConnection: () => undefined,
-  registerSharedListener: () => undefined,
+  registerSharedListener: () => () => {},
 });
 
 export default IoContext;

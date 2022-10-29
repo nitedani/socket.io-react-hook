@@ -61,7 +61,26 @@ const Index = () => {
 }
 ```
 
-useSocketEvent will immediately return the last available value of lastMessage even on newly mounted components.
+
+
+```tsx
+const Index = () => {
+  const [messages, setMessages] = useState([]);
+  const { socket, connected, error } = useAuthenticatedSocket();
+  const onMessage = (message) => setMessages((state) => [...state, message]);
+  useSocketEvent<string>(socket, "eventName", { onMessage });
+  ...
+};
+```
+
+useSocketEvent parameters:
+- socket: SocketIo object
+- event: string
+- options:
+  - onMessage: (message) => void
+  - keepPrevious: (default false) if true, useSocketEvent will immediately return the last available value of lastMessage after being remounted
+
+
 
 Emitting messages works as always:
 

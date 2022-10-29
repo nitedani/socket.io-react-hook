@@ -13,6 +13,7 @@ import {
 
 const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
   const connections = useRef<Record<string, number>>({});
+  const eventSubscriptions = useRef<Record<string, number>>({});
   const sockets = useRef<
     Record<
       IoNamespace,
@@ -122,6 +123,28 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
         sockets.current[namespaceKey].notify();
       });
     }
+    const subscriptionKey = `${namespaceKey}${forEvent}`;
+    const cleanup = () => {
+      if (--eventSubscriptions.current[subscriptionKey] === 0) {
+        const subscriptionsToClose = Object.keys(
+          eventSubscriptions.current
+        ).filter((key) => key.includes(subscriptionKey));
+
+        for (const key of subscriptionsToClose) {
+          // when all useSocketEvent hooks unmount for a specific event,
+          // remove lastMessage to prevent showing stale messages on remount
+          delete eventSubscriptions.current[key];
+        }
+      }
+    };
+
+    if (!(subscriptionKey in eventSubscriptions.current)) {
+      connections.current[subscriptionKey] = 1;
+    } else {
+      connections.current[subscriptionKey] += 1;
+    }
+
+    return () => cleanup();
   };
 
   return (

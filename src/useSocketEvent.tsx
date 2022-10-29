@@ -5,7 +5,14 @@ import { IoContextInterface, SocketLike } from "./types";
 
 const useSocketEvent = <T extends unknown>(
   socket: SocketLike,
-  event: string
+  event: string,
+  {
+    keepPrevious,
+    onMessage,
+  }: {
+    keepPrevious?: boolean;
+    onMessage?: (message: T) => void;
+  }
 ) => {
   const ioContext = useContext<IoContextInterface<Socket>>(IoContext);
   const { registerSharedListener, getConnection } = ioContext;
@@ -18,10 +25,21 @@ const useSocketEvent = <T extends unknown>(
   const sendMessage = (message: any) => socket.emit(event, message);
 
   useEffect(() => {
-    registerSharedListener(socket.namespaceKey, event);
-    return connection?.subscribe((state) => {
-      setLastMessage(state.lastMessage[event] as T);
+    if (!connection) return;
+    const cleanup = registerSharedListener(socket.namespaceKey, event);
+    const unsubscribe = connection.subscribe((state) => {
+      const lastMessage = state.lastMessage[event] as T;
+      setLastMessage(lastMessage);
+      if (onMessage) {
+        onMessage(lastMessage);
+      }
     });
+    return () => {
+      unsubscribe();
+      if (!keepPrevious) {
+        cleanup();
+      }
+    };
   }, [socket]);
 
   return { lastMessage, sendMessage, socket };

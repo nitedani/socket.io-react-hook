@@ -19,9 +19,11 @@ export type SocketState = {
   subscribers: Set<(state: SocketState["state"]) => void>;
 };
 
+export type CleanupFunction = () => void;
+
 export type CreateConnectionFuncReturnType<T extends Socket = Socket> = {
   socket: SocketLike<T>;
-  cleanup: () => void;
+  cleanup: CleanupFunction;
 } & SocketState;
 
 export type CreateConnectionFunc<T extends Socket = Socket> = (
@@ -38,7 +40,10 @@ export type GetConnectionFunc<T extends Socket> = (namespace?: IoNamespace) =>
 export type IoContextInterface<T extends Socket> = {
   createConnection: CreateConnectionFunc<T>;
   getConnection: GetConnectionFunc<T>;
-  registerSharedListener: (namespace: string, forEvent: string) => void;
+  registerSharedListener: (
+    namespace: string,
+    forEvent: string
+  ) => CleanupFunction;
 };
 
 export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
