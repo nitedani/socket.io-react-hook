@@ -1,8 +1,10 @@
 {
   "name": "socket.io-react-hook",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "",
-  "main": "lib/cjs/index.js",
+  "main": "./lib/cjs/index.js",
+  "types": "./lib/cjs/index.d.ts",
+  "module": "./lib/esm/index.js",
   "author": {
     "email": "nitedani@gmail.com",
     "name": "Horváth Dániel"
@@ -18,7 +20,13 @@
     "type": "git",
     "url": "https://github.com/nitedani/socket.io-react-hooks.git"
   },
-  "typings": "./lib/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./lib/cjs/index.js",
+      "import": "./lib/esm/index.js",
+      "types": "./lib/cjs/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "npm run build:esm && npm run  build:cjs",
     "build:esm": "tsc",
