@@ -95,3 +95,21 @@ Or by calling sendMessage
   sendMessage(data);
 
 ```
+
+[Typescript usage](https://socket.io/docs/v4/typescript/#types-for-the-client):
+
+```ts
+interface ServerToClientEvents {
+  noArg: () => void;
+  basicEmit: (a: number, b: string, c: any) => void;
+  withAck: (d: string, callback: (e: number) => void) => void;
+}
+
+interface ClientToServerEvents {
+  hello: () => void;
+}
+const { socket } = useSocket<ServerToClientEvents, ClientToServerEvents>();
+
+socket.on("withAck", (d, callback) => {});
+socket.emit("hello");
+```

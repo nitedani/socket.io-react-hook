@@ -1,3 +1,4 @@
+import type { EventsMap, DefaultEventsMap } from "@socket.io/component-emitter";
 import { Socket } from "socket.io-client";
 import { url } from "./utils/url";
 import IoContext from "./IoContext";
@@ -11,17 +12,36 @@ import {
 import SocketMock from "socket.io-mock";
 import { useContext, useEffect, useRef, useState } from "react";
 
-function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
-  options?: UseSocketOptions<I>
-): UseSocketReturnType<T>;
-function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
+function useSocket<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  SocketType extends Socket<ListenEvents, EmitEvents> = Socket<
+    ListenEvents,
+    EmitEvents
+  >
+>(options?: UseSocketOptions): UseSocketReturnType<SocketType>;
+function useSocket<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  SocketType extends Socket<ListenEvents, EmitEvents> = Socket<
+    ListenEvents,
+    EmitEvents
+  >
+>(
   namespace: IoNamespace,
-  options?: UseSocketOptions<I>
-): UseSocketReturnType<T>;
-function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
-  namespace?: string | UseSocketOptions<I>,
-  options?: UseSocketOptions<I>
-): UseSocketReturnType<T> {
+  options?: UseSocketOptions
+): UseSocketReturnType<SocketType>;
+function useSocket<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  SocketType extends Socket<ListenEvents, EmitEvents> = Socket<
+    ListenEvents,
+    EmitEvents
+  >
+>(
+  namespace?: string | UseSocketOptions,
+  options?: UseSocketOptions
+): UseSocketReturnType<SocketType> {
   const opts = {
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
@@ -32,12 +52,12 @@ function useSocket<I extends Record<string, any>, T extends Socket = Socket>(
 
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
   const { createConnection, getConnection } =
-    useContext<IoContextInterface<SocketLike<T>>>(IoContext);
+    useContext<IoContextInterface<SocketType>>(IoContext);
 
   const connection = getConnection(namespaceKey);
 
   const state = useRef<{
-    socket: SocketLike<T>;
+    socket: SocketLike<SocketType>;
     status: "connecting" | "connected" | "disconnected";
     error: Error | null;
   }>({

@@ -46,12 +46,16 @@ export type IoContextInterface<T extends Socket> = {
   ) => CleanupFunction;
 };
 
-export type UseSocketOptions<I> = Partial<ManagerOptions & SocketOptions> & {
+export type UseSocketOptions = Partial<ManagerOptions & SocketOptions> & {
   enabled?: boolean;
-} & I;
+};
 
 export type UseSocketReturnType<T extends Socket> = {
   socket: SocketLike<T>;
   connected: boolean;
   error: any;
+};
+export type UseSocketEventProps<T> = {
+  keepPrevious?: boolean;
+  onMessage?: (message: T) => void;
 };

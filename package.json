@@ -1,6 +1,6 @@
 {
   "name": "socket.io-react-hook",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "",
   "main": "./lib/cjs/index.js",
   "types": "./lib/cjs/index.d.ts",
@@ -39,7 +39,7 @@
   "dependencies": {
     "parseuri": "0.0.6",
     "socket.io-mock": "^1.3.2",
-    "socket.io-client": "^4.5.0"
+    "socket.io-client": "^4.5.3"
   },
   "files": [
     "/lib"

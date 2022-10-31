@@ -1,19 +1,20 @@
 import { useContext, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import IoContext from "./IoContext";
-import { IoContextInterface, SocketLike } from "./types";
+import { IoContextInterface, SocketLike, UseSocketEventProps } from "./types";
 
 const useSocketEvent = <T extends unknown>(
   socket: SocketLike,
   event: string,
-  {
-    keepPrevious,
-    onMessage,
-  }: {
-    keepPrevious?: boolean;
-    onMessage?: (message: T) => void;
-  }
+  options?: UseSocketEventProps<T>
 ) => {
+  let onMessage;
+  let keepPrevious;
+  if (options) {
+    onMessage = options.onMessage;
+    keepPrevious = options.keepPrevious;
+  }
+
   const ioContext = useContext<IoContextInterface<Socket>>(IoContext);
   const { registerSharedListener, getConnection } = ioContext;
   const connection = getConnection(socket.namespaceKey);
