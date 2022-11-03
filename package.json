@@ -6,15 +6,15 @@
   "scripts": {
     "build": "turbo run build",
     "release": "pnpm build && pnpm test && bumpp package.json packages/*/package.json examples/*/package.json && pnpm -r publish --access=public",
-    "test": "playwright test"
+    "test": "test-e2e"
   },
   "devDependencies": {
-    "@playwright/test": "^1.26.0",
+    "@brillout/test-e2e": "^0.1.22",
     "bumpp": "^8.2.1",
-    "fs-extra": "^10.1.0",
-    "kill-port": "^2.0.1",
-    "playwright": "^1.26.0",
     "turbo": "^1.4.6"
   },
-  "engines": {}
+  "engines": {},
+  "dependencies": {
+    "kill-port": "^2.0.1"
+  }
 }
