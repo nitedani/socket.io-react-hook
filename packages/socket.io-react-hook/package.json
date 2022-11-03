@@ -1,6 +1,6 @@
 {
   "name": "socket.io-react-hook",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "",
   "main": "./lib/cjs/index.js",
   "types": "./lib/cjs/index.d.ts",
