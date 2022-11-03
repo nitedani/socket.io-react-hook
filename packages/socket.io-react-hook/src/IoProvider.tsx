@@ -63,12 +63,12 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
 
     const handleConnect = () => {
       sockets.current[namespaceKey].state.status = "connected";
-      sockets.current[namespaceKey].notify();
+      sockets.current[namespaceKey].notify("connected");
     };
 
     const handleDisconnect = () => {
       sockets.current[namespaceKey].state.status = "disconnected";
-      sockets.current[namespaceKey].notify();
+      sockets.current[namespaceKey].notify("disconnected");
     };
 
     const socket = io(urlConfig.source, options) as SocketLike;
@@ -82,23 +82,23 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
           lastMessage: {},
           error: null,
         },
-        notify: () => {
+        notify: (event: string) => {
           sockets.current[namespaceKey].subscribers.forEach((callback) =>
-            callback(sockets.current[namespaceKey].state)
+            callback(sockets.current[namespaceKey].state, event)
           );
         },
         subscribers: new Set(),
         subscribe: (callback) => {
           sockets.current[namespaceKey].subscribers.add(callback);
           return () =>
-            sockets.current[namespaceKey].subscribers.delete(callback);
+            sockets.current[namespaceKey]?.subscribers.delete(callback);
         },
       },
     });
 
     socket.on("error", (error) => {
       sockets.current[namespaceKey].state.error = error;
-      sockets.current[namespaceKey].notify();
+      sockets.current[namespaceKey].notify("error");
     });
 
     socket.on("connect", handleConnect);
@@ -120,7 +120,7 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
     ) {
       sockets.current[namespaceKey].socket.on(forEvent, (message) => {
         sockets.current[namespaceKey].state.lastMessage[forEvent] = message;
-        sockets.current[namespaceKey].notify();
+        sockets.current[namespaceKey].notify("message");
       });
     }
     const subscriptionKey = `${namespaceKey}${forEvent}`;

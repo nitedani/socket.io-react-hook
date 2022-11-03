@@ -42,6 +42,15 @@ function useSocket<
   namespace?: string | UseSocketOptions,
   options?: UseSocketOptions
 ): UseSocketReturnType<SocketType> {
+  const isServer = typeof window === "undefined";
+  if (isServer) {
+    return {
+      socket: new SocketMock(),
+      connected: false,
+      error: null,
+    };
+  }
+
   const opts = {
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
@@ -61,7 +70,7 @@ function useSocket<
     status: "connecting" | "connected" | "disconnected";
     error: Error | null;
   }>({
-    socket: new SocketMock(),
+    socket: connection?.socket || new SocketMock(),
     status: connection?.state.status || "disconnected",
     error: null,
   });
@@ -70,7 +79,7 @@ function useSocket<
   const connected = state.current.status === "connected";
 
   useEffect(() => {
-    if (enabled && typeof window !== "undefined") {
+    if (enabled) {
       const {
         socket: _socket,
         cleanup,

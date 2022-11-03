@@ -14,9 +14,11 @@ export type SocketState = {
     error: Error | null;
     lastMessage: Record<string, any>;
   };
-  notify: () => void;
-  subscribe: (callback: (state: SocketState["state"]) => void) => () => void;
-  subscribers: Set<(state: SocketState["state"]) => void>;
+  notify: (event: string) => void;
+  subscribe: (
+    callback: (state: SocketState["state"], event: string) => void
+  ) => () => void;
+  subscribers: Set<(state: SocketState["state"], event: string) => void>;
 };
 
 export type CleanupFunction = () => void;

@@ -28,11 +28,13 @@ const useSocketEvent = <T extends unknown>(
   useEffect(() => {
     if (!connection) return;
     const cleanup = registerSharedListener(socket.namespaceKey, event);
-    const unsubscribe = connection.subscribe((state) => {
-      const lastMessage = state.lastMessage[event] as T;
-      setLastMessage(lastMessage);
-      if (onMessage) {
-        onMessage(lastMessage);
+    const unsubscribe = connection.subscribe((state, event) => {
+      if (event === "message") {
+        const lastMessage = state.lastMessage[event] as T;
+        setLastMessage(lastMessage);
+        if (onMessage) {
+          onMessage(lastMessage);
+        }
       }
     });
     return () => {

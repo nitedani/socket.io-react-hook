@@ -1,47 +1,20 @@
 {
   "name": "socket.io-react-hook",
   "version": "2.2.0",
-  "description": "",
-  "main": "./lib/cjs/index.js",
-  "types": "./lib/cjs/index.d.ts",
-  "module": "./lib/esm/index.js",
-  "author": {
-    "email": "nitedani@gmail.com",
-    "name": "Horváth Dániel"
-  },
-  "keywords": [
-    "socket.io",
-    "socket",
-    "react",
-    "hooks"
-  ],
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nitedani/socket.io-react-hooks.git"
-  },
-  "exports": {
-    ".": {
-      "require": "./lib/cjs/index.js",
-      "import": "./lib/esm/index.js",
-      "types": "./lib/cjs/index.d.ts"
-    }
-  },
+  "private": true,
+  "type": "module",
   "scripts": {
-    "build": "npm run build:esm && npm run  build:cjs",
-    "build:esm": "tsc",
-    "build:cjs": "tsc --module commonjs --outDir lib/cjs"
+    "build": "turbo run build",
+    "release": "pnpm build && pnpm test && bumpp package.json packages/*/package.json examples/*/package.json && pnpm -r publish --access=public",
+    "test": "playwright test"
   },
   "devDependencies": {
-    "@types/react": "^18.0.9",
-    "typescript": "^4.6.4"
+    "@playwright/test": "^1.26.0",
+    "bumpp": "^8.2.1",
+    "fs-extra": "^10.1.0",
+    "kill-port": "^2.0.1",
+    "playwright": "^1.26.0",
+    "turbo": "^1.4.6"
   },
-  "dependencies": {
-    "parseuri": "0.0.6",
-    "socket.io-mock": "^1.3.2",
-    "socket.io-client": "^4.5.3"
-  },
-  "files": [
-    "/lib"
-  ]
+  "engines": {}
 }
