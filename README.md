@@ -91,8 +91,21 @@ Emitting messages works as always:
 ```
 Or by calling sendMessage
 ```tsx
+  //Client
   const { socket, lastMessage, sendMessage } = useSocketEvent<string>(socket, 'eventName');
-  sendMessage(data);
+  ...
+  const response = await sendMessage<{ status: string }>("hi server");
+  console.log(response.status) // "ok"
+
+  //Server
+  io.on("connection", (socket) => {
+    socket.on("eventName", (message, callback) => {
+      console.log(message) // "hi server"
+      callback({
+        status: "ok"
+      });
+    });
+  });
 
 ```
 
