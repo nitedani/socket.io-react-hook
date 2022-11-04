@@ -23,13 +23,18 @@ const useSocketEvent = <T extends unknown>(
     connection?.state.lastMessage[event] as T
   );
 
-  const sendMessage = (message: any) => socket.emit(event, message);
+  const sendMessage = <T extends unknown>(message: any) =>
+    new Promise<T>((resolve, _reject) => {
+      socket.emit(event, message, (response: T) => {
+        resolve(response);
+      });
+    });
 
   useEffect(() => {
     if (!connection) return;
     const cleanup = registerSharedListener(socket.namespaceKey, event);
-    const unsubscribe = connection.subscribe((state, event) => {
-      if (event === "message") {
+    const unsubscribe = connection.subscribe((state, _event) => {
+      if (_event === "message") {
         const lastMessage = state.lastMessage[event] as T;
         setLastMessage(lastMessage);
         if (onMessage) {

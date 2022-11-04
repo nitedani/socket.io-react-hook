@@ -6,7 +6,7 @@ const SocketHandler = (req: any, res: any) => {
     res.socket.server.io = io;
     io.on("connection", (socket) => {
       const interval = setInterval(() => {
-        socket.emit("message", "Hello World!");
+        socket.emit("message", "Hello World!" + Date.now());
       }, 1000);
       socket.on("disconnect", () => {
         clearInterval(interval);
