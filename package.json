@@ -1,6 +1,6 @@
 {
   "name": "socket.io-react-hook",
-  "version": "2.2.4",
+  "version": "2.2.7",
   "private": true,
   "type": "module",
   "scripts": {

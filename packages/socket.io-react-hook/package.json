@@ -1,6 +1,6 @@
 {
   "name": "socket.io-react-hook",
-  "version": "2.2.4",
+  "version": "2.2.7",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -59,6 +59,6 @@
     ]
   },
   "files": [
-    "/lib"
+    "/dist"
   ]
 }
