@@ -2,9 +2,9 @@
   "name": "socket.io-react-hook",
   "version": "2.2.2",
   "description": "",
-  "main": "./lib/cjs/index.js",
-  "types": "./lib/cjs/index.d.ts",
-  "module": "./lib/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "author": {
     "email": "nitedani@gmail.com",
     "name": "Horváth Dániel"
@@ -18,29 +18,45 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nitedani/socket.io-react-hooks.git"
+    "url": "https://github.com/nitedani/socket.io-react-hooks.git",
+    "directory": "packages/socket.io-react-hook"
   },
   "exports": {
     ".": {
-      "require": "./lib/cjs/index.js",
-      "import": "./lib/esm/index.js",
-      "types": "./lib/cjs/index.d.ts"
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run build:esm && npm run  build:cjs",
-    "build:esm": "tsc",
-    "build:cjs": "tsc --module commonjs --outDir lib/cjs"
+    "build": "tsup src --dts",
+    "dev": "pnpm build:fast -- --watch",
+    "clean": "rimraf dist .turbo",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@socket.io/component-emitter": "^3.1.0",
     "@types/react": "^18.0.9",
+    "rimraf": "^4.4.0",
+    "tsup": "^6.6.3",
     "typescript": "^4.6.4"
   },
   "dependencies": {
     "parseuri": "0.0.6",
     "socket.io-client": "^4.5.3",
     "socket.io-mock": "^1.3.2"
+  },
+  "peerDependencies": {
+    "react": "*"
+  },
+  "tsup": {
+    "clean": true,
+    "target": "es2019",
+    "format": [
+      "cjs",
+      "esm"
+    ]
   },
   "files": [
     "/lib"
