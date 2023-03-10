@@ -23,9 +23,18 @@ Usage: <br>
   const { socket, error } = useSocket();  
   const { lastMessage, sendMessage } = useSocketEvent(socket, 'message');
 
+  OR
+
+  const { lastMessage, sendMessage } = useSocketEvent('message');
 ```
 
-useSocket forwards all parameters to socket.io constructor.<br>
+If the socket parameter is not passed to useSocketEvent, the options of useSocket can be passed in the second parameter of useSocketEvent.
+For example
+```tsx
+  const { lastMessage, sendMessage } = useSocketEvent('message', { path: "/socket", extraHeaders: ... });
+```
+
+useSocket and useSocketEvent forwards all relevant parameters to socket.io constructor.<br>
 See the available options [here](https://socket.io/docs/v4/client-initialization/)
 
 If the socket connection depends on state, use it like this: <br>
