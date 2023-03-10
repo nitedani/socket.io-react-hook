@@ -1,4 +1,9 @@
 React hooks for socket.io 4.x
+
+Examples:
+- [Next.js](examples/next/)
+- [Rakkas](examples/rakkas/)
+
 ---
 Usage: <br>
 1. Wrap your components with the provider
