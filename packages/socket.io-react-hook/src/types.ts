@@ -61,3 +61,8 @@ export type UseSocketEventProps<T> = {
   keepPrevious?: boolean;
   onMessage?: (message: T) => void;
 };
+export type UseSocketEventReturnType<T extends unknown> = {
+  lastMessage: T;
+  sendMessage: (message: any) => Promise<T>;
+  socket: SocketLike;
+};
