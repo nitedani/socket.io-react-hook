@@ -24,8 +24,13 @@ function useSocketEvent<T extends unknown = any>(
   event?: string | (UseSocketEventProps<T> & UseSocketOptions),
   options?: UseSocketEventProps<T>
 ): UseSocketEventReturnType<T> {
+  let enabled = true;
   if (typeof socket === "string") {
-    options = event as (UseSocketEventProps<T> & UseSocketOptions) | undefined;
+    const _options = event as
+      | (UseSocketEventProps<T> & UseSocketOptions)
+      | undefined;
+    options = _options;
+    enabled = _options?.enabled ?? true;
     event = socket;
     socket = useSocket(
       options as (UseSocketEventProps<T> & UseSocketOptions) | undefined
@@ -41,7 +46,7 @@ function useSocketEvent<T extends unknown = any>(
 
   const ioContext = useContext<IoContextInterface<SocketLike>>(IoContext);
   const { registerSharedListener, getConnection } = ioContext;
-  const connection = getConnection(socket.namespaceKey);
+  const connection = enabled ? getConnection(socket.namespaceKey) : null;
   const [, rerender] = useState({});
   const state = useRef<{
     socket: SocketLike;

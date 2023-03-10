@@ -62,7 +62,9 @@ export type UseSocketEventProps<T> = {
   onMessage?: (message: T) => void;
 };
 export type UseSocketEventReturnType<T extends unknown> = {
-  lastMessage: T;
   sendMessage: (message: any) => Promise<T>;
   socket: SocketLike;
+  status: "connecting" | "connected" | "disconnected";
+  error: Error | null;
+  lastMessage: T;
 };
