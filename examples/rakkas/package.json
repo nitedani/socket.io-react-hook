@@ -28,5 +28,6 @@
     "react-dom": "^18.2.0",
     "socket.io": "^4.6.1",
     "socket.io-react-hook": "*"
-  }
+  },
+  "version": "2.3.2"
 }
