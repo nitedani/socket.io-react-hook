@@ -80,7 +80,7 @@ function useSocketEvent<T extends unknown = any>(
         changed = true;
       }
 
-      if (state.current.lastMessage !== newState.lastMessage[event as string]) {
+      if (_event === "message") {
         const lastMessage = newState.lastMessage[event as string];
         state.current.lastMessage = lastMessage;
         if (onMessage) {
