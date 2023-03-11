@@ -4,6 +4,8 @@ import IoContext from "./IoContext";
 import { CustomServer, IoContextInterface, SocketLike } from "./types";
 import useSocket from "./useSocket";
 
+let initializedDev = false;
+
 const delimiter = "¤";
 const op = (id: number) => `${delimiter}${id}${delimiter}` as const;
 const JOIN_ROOM = op(1);
@@ -19,13 +21,16 @@ const createEmitter =
     socket.emitWithAck(EMIT, event, room, ...args);
 
 const initRpcServer = (server: CustomServer) => {
-  server.removeAllListeners();
-  server.sockets.removeAllListeners();
-  server.sockets.sockets.forEach((socket) => {
-    socket.removeAllListeners();
-  });
   server.callbacks = new Map<string, (socket: Socket) => void>();
-  server.on("connection", (socket) => {
+
+  // @ts-ignore
+  if (server.__listener) {
+    // @ts-ignore
+    server.off("connection", server.__listener);
+  }
+
+  // @ts-ignore
+  server.__listener = (socket: Socket) => {
     const rpcPrefix = socket.handshake.query["rpc-prefix"] as
       | string
       | undefined;
@@ -84,17 +89,17 @@ const initRpcServer = (server: CustomServer) => {
         }
         server.callbacks.forEach((_cb, id) => {
           if (id.includes(rpcPrefix)) {
-            console.log("delete", id, rpcPrefix);
-
             server.callbacks.delete(id);
           }
         });
       }, 1000);
     });
-  });
+  };
+
+  // @ts-ignore
+  server.on("connection", server.__listener);
 };
 
-let initializedDev = false;
 export const useSocketServer = (
   cb?: (socket: Socket, server: Server) => void
 ) => {
@@ -109,8 +114,6 @@ export const useSocketServer = (
     if (!cb) {
       return;
     }
-
-    console.log("useEffect", socket.connected, callbackId);
     if (socket.connected) {
       socket.emit(CALLBACK, callbackId);
       return () => {};

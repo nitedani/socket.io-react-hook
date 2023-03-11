@@ -20,9 +20,10 @@ export default function HomePage() {
   });
 
   useSocketServer((socket, server) => {
+    // this callback runs only server side
     authSocket(socket);
     socket.on("message", (message) => {
-      server.emit("message", message);
+      server.emit("message", `Message from ${socket.id}: ${message}`);
     });
   });
 
