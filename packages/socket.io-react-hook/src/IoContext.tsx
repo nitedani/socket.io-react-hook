@@ -7,6 +7,7 @@ const IoContext = React.createContext<IoContextInterface<any>>({
   getConnection: () => undefined,
   registerSharedListener: () => () => {},
   server: undefined,
+  rpcPrefix: "",
 });
 
 export default IoContext;

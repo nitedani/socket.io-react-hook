@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Socket } from "socket.io";
+import type { Socket } from "socket.io";
 import { useSocketEvent, useSocketServer } from "socket.io-react-hook";
 
 const authSocket = (socket: Socket) => {

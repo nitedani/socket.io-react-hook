@@ -44,6 +44,7 @@ export type CustomServer = Server & {
   initializedRpc?: boolean;
   callbacks: Map<string, (socket: ServerSocket, server: Server) => void>;
 };
+
 export type IoContextInterface<T extends Socket> = {
   createConnection: CreateConnectionFunc<T>;
   getConnection: GetConnectionFunc<T>;
@@ -52,6 +53,7 @@ export type IoContextInterface<T extends Socket> = {
     forEvent: string
   ) => CleanupFunction;
   server?: CustomServer;
+  rpcPrefix: string;
 };
 
 export type UseSocketOptions = Partial<ManagerOptions & SocketOptions> & {

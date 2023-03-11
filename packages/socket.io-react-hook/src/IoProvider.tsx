@@ -12,12 +12,23 @@ import {
   CustomServer,
 } from "./types";
 
+const isServer = typeof window === "undefined";
+
 const IoProvider = function ({
   children,
   server,
 }: React.PropsWithChildren<{
   server?: Server;
 }>) {
+  let rpcPrefix = "";
+  if (isServer) {
+    // random hex, 16 chars
+    rpcPrefix = Math.random().toString(16).substr(2, 16);
+  } else {
+    // @ts-ignore
+    rpcPrefix = window.__rpcPrefix;
+  }
+
   const connections = useRef<Record<string, number>>({});
   const eventSubscriptions = useRef<Record<string, number>>({});
   const sockets = useRef<
@@ -77,6 +88,8 @@ const IoProvider = function ({
       sockets.current[namespaceKey].notify("disconnected");
     };
 
+    options.query ??= {};
+    options.query["rpc-prefix"] = rpcPrefix;
     const socket = io(urlConfig.source, options) as SocketLike;
     socket.namespaceKey = namespaceKey;
 
@@ -154,16 +167,25 @@ const IoProvider = function ({
   };
 
   return (
-    <IoContext.Provider
-      value={{
-        createConnection,
-        getConnection,
-        registerSharedListener,
-        server: server as CustomServer,
-      }}
-    >
-      {children}
-    </IoContext.Provider>
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.__rpcPrefix = "${rpcPrefix}";`,
+        }}
+      />
+
+      <IoContext.Provider
+        value={{
+          createConnection,
+          getConnection,
+          registerSharedListener,
+          server: server as CustomServer,
+          rpcPrefix,
+        }}
+      >
+        {children}
+      </IoContext.Provider>
+    </>
   );
 };
 
