@@ -1,5 +1,6 @@
-import { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
-import { url } from "./utils/url";
+import type { Server, Socket as ServerSocket } from "socket.io";
+import type { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
+import type { url } from "./utils/url";
 export type IoNamespace = string;
 
 export type IoConnection = Socket;
@@ -39,6 +40,10 @@ export type GetConnectionFunc<T extends Socket> = (namespace?: IoNamespace) =>
     } & SocketState)
   | undefined;
 
+export type CustomServer = Server & {
+  initializedRpc?: boolean;
+  callbacks: Map<string, (socket: ServerSocket, server: Server) => void>;
+};
 export type IoContextInterface<T extends Socket> = {
   createConnection: CreateConnectionFunc<T>;
   getConnection: GetConnectionFunc<T>;
@@ -46,6 +51,7 @@ export type IoContextInterface<T extends Socket> = {
     namespace: string,
     forEvent: string
   ) => CleanupFunction;
+  server?: CustomServer;
 };
 
 export type UseSocketOptions = Partial<ManagerOptions & SocketOptions> & {

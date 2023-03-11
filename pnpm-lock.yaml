@@ -49,6 +49,7 @@ importers:
       '@rakkasjs/eslint-config': 0.6.19
       '@types/react': ^18.0.28
       '@types/react-dom': ^18.0.11
+      dotenv-cli: ^7.1.0
       eslint: ^8.34.0
       prettier: ^2.8.4
       rakkasjs: 0.6.19
@@ -68,6 +69,7 @@ importers:
       '@rakkasjs/eslint-config': 0.6.19_ycpbpc6yetojsgtrx3mwntkhsu
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
+      dotenv-cli: 7.1.0
       eslint: 8.35.0
       prettier: 2.8.4
       rakkasjs: 0.6.19_fxj666ieahc6d4tiwyl2lemg5y
@@ -81,7 +83,7 @@ importers:
       '@types/react': ^18.0.9
       parseuri: 0.0.6
       rimraf: ^4.4.0
-      socket.io-client: ^4.5.3
+      socket.io-client: ^4.6.1
       socket.io-mock: ^1.3.2
       tsup: ^6.6.3
       typescript: ^4.6.4
@@ -2040,6 +2042,26 @@ packages:
       dom-serializer: 2.0.0
       domelementtype: 2.3.0
       domhandler: 5.0.3
+    dev: true
+
+  /dotenv-cli/7.1.0:
+    resolution: {integrity: sha512-motytjZFQB3ZtGTIN4c0vnFgv4kuNZ2WxVnGY6PVFiygCzkm3IFBBguDUzezd9HgNA0OYYd6vNCWlozs0Q1Zxg==}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
+      dotenv: 16.0.3
+      dotenv-expand: 10.0.0
+      minimist: 1.2.8
+    dev: true
+
+  /dotenv-expand/10.0.0:
+    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
+    dev: true
+
+  /dotenv/16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
     dev: true
 
   /electron-to-chromium/1.4.327:

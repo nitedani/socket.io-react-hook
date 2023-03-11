@@ -1,17 +1,30 @@
-import { runSSM } from "rakkasjs";
 import { useRef, useState } from "react";
-import { useSocketEvent } from "socket.io-react-hook";
+import { Socket } from "socket.io";
+import { useSocketEvent, useSocketServer } from "socket.io-react-hook";
+
+const authSocket = (socket: Socket) => {
+  if (socket.handshake.auth.token !== process.env.SECRET) {
+    socket.disconnect(true);
+  }
+};
 
 export default function HomePage() {
   const ref = useRef<HTMLInputElement>(null);
   const [messages, setMessages] = useState<string[]>([]);
 
-  useSocketEvent<string>("message", {
+  const { sendMessage } = useSocketEvent<string>("message", {
     onMessage: (message) => setMessages((messages) => [...messages, message]),
+    auth: {
+      token: "secret",
+    },
   });
 
-  const sendMessage = (message: string) =>
-    runSSM((ctx) => ctx.locals.io.emit("message", message));
+  useSocketServer((socket, server) => {
+    authSocket(socket);
+    socket.on("message", (message) => {
+      server.emit("message", message);
+    });
+  });
 
   return (
     <div>

@@ -31,8 +31,7 @@
   },
   "scripts": {
     "build": "tsup src --dts",
-    "build:fast": "tsup src --watch",
-    "dev": "pnpm build:fast -- --watch",
+    "dev": "tsup src --dts --watch",
     "clean": "rimraf dist .turbo",
     "typecheck": "tsc --noEmit"
   },
@@ -45,11 +44,12 @@
   },
   "dependencies": {
     "parseuri": "0.0.6",
-    "socket.io-client": "^4.5.3",
+    "socket.io-client": "^4.6.1",
     "socket.io-mock": "^1.3.2"
   },
   "peerDependencies": {
-    "react": "*"
+    "react": "*",
+    "socket.io": "^4.6.1"
   },
   "tsup": {
     "clean": true,

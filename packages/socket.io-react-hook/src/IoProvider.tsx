@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
+import type { Server } from "socket.io";
 import io from "socket.io-client";
 import IoContext from "./IoContext";
-
 import {
   CreateConnectionFunc,
   IoConnection,
@@ -9,9 +9,15 @@ import {
   GetConnectionFunc,
   SocketLike,
   SocketState,
+  CustomServer,
 } from "./types";
 
-const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
+const IoProvider = function ({
+  children,
+  server,
+}: React.PropsWithChildren<{
+  server?: Server;
+}>) {
   const connections = useRef<Record<string, number>>({});
   const eventSubscriptions = useRef<Record<string, number>>({});
   const sockets = useRef<
@@ -153,6 +159,7 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
         createConnection,
         getConnection,
         registerSharedListener,
+        server: server as CustomServer,
       }}
     >
       {children}
