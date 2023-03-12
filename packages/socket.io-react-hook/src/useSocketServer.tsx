@@ -1,5 +1,5 @@
-import { useContext, useEffect, useId } from "react";
-import type { Server, Socket } from "socket.io";
+import { useContext } from "react";
+import type { Socket } from "socket.io";
 import IoContext from "./IoContext";
 import { CustomServer, IoContextInterface, SocketLike } from "./types";
 import useSocket from "./useSocket";
@@ -13,7 +13,6 @@ const LEAVE_ROOM = op(2);
 const EMIT = op(3);
 const BROADCAST = op(4);
 const NO_ROOM = op(5);
-const CALLBACK = op(6);
 
 const createEmitter =
   ({ room, socket }: { room?: string; socket: SocketLike }) =>
@@ -21,8 +20,6 @@ const createEmitter =
     socket.emitWithAck(EMIT, event, room, ...args);
 
 const initRpcServer = (server: CustomServer) => {
-  server.callbacks = new Map<string, (socket: Socket) => void>();
-
   // @ts-ignore
   if (server.__listener) {
     // @ts-ignore
@@ -31,14 +28,6 @@ const initRpcServer = (server: CustomServer) => {
 
   // @ts-ignore
   server.__listener = (socket: Socket) => {
-    const rpcPrefix = socket.handshake.query["rpc-prefix"] as
-      | string
-      | undefined;
-    if (!rpcPrefix) {
-      socket.disconnect(true);
-      return;
-    }
-
     socket.on(JOIN_ROOM, (room: string, ack) => {
       socket.join(room);
       ack?.();
@@ -70,63 +59,16 @@ const initRpcServer = (server: CustomServer) => {
       socket.to(room).emit(event, ...args);
       ack?.();
     });
-    socket.on(CALLBACK, (callbackId) => {
-      const cb = server.callbacks.get(callbackId);
-      if (cb) {
-        cb(socket, server);
-      }
-    });
-    socket.once("disconnect", () => {
-      setTimeout(() => {
-        const sockets = server.sockets.sockets;
-        const socket = Array.from(sockets.values()).find(
-          (socket) => socket.handshake.query["rpc-prefix"] === rpcPrefix
-        );
-
-        if (socket) {
-          // the client reconnected before the timeout
-          return;
-        }
-        server.callbacks.forEach((_cb, id) => {
-          if (id.includes(rpcPrefix)) {
-            server.callbacks.delete(id);
-          }
-        });
-      }, 1000);
-    });
   };
 
   // @ts-ignore
   server.on("connection", server.__listener);
 };
 
-export const useSocketServer = (
-  cb?: (socket: Socket, server: Server) => void
-) => {
+export const useSocketServer = () => {
   const { socket } = useSocket();
   const ioContext = useContext<IoContextInterface<SocketLike>>(IoContext);
   const server = ioContext.server;
-  const rpcPrefix = ioContext.rpcPrefix;
-  const hookId = useId();
-  const callbackId = `${hookId}${delimiter}${rpcPrefix}`;
-
-  useEffect(() => {
-    if (!cb) {
-      return;
-    }
-    if (socket.connected) {
-      socket.emit(CALLBACK, callbackId);
-      return () => {};
-    } else {
-      const listener = () => {
-        socket.emit(CALLBACK, callbackId);
-      };
-      socket.on("connect", listener);
-      return () => {
-        socket.off("connect", listener);
-      };
-    }
-  }, [socket]);
 
   if (
     server &&
@@ -136,10 +78,6 @@ export const useSocketServer = (
     server.initializedRpc = true;
     initializedDev = true;
     initRpcServer(server);
-  }
-
-  if (cb && server) {
-    server.callbacks.set(callbackId, cb);
   }
 
   const operations = {

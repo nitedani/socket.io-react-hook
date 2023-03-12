@@ -1,4 +1,4 @@
-import type { Server, Socket as ServerSocket } from "socket.io";
+import type { Server } from "socket.io";
 import type { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import type { url } from "./utils/url";
 export type IoNamespace = string;
@@ -42,7 +42,6 @@ export type GetConnectionFunc<T extends Socket> = (namespace?: IoNamespace) =>
 
 export type CustomServer = Server & {
   initializedRpc?: boolean;
-  callbacks: Map<string, (socket: ServerSocket, server: Server) => void>;
 };
 
 export type IoContextInterface<T extends Socket> = {
