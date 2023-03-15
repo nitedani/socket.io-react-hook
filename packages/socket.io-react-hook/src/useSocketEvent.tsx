@@ -4,49 +4,89 @@ import IoContext from "./IoContext";
 import {
   IoContextInterface,
   SocketLike,
-  UseSocketEventProps,
+  UseSocketEventOptions,
   UseSocketEventReturnType,
   UseSocketOptions,
 } from "./types";
 import useSocket from "./useSocket";
-import type {Socket} from "socket.io-client";
+import type { Socket } from "socket.io-client";
+import type {
+  DefaultEventsMap,
+  EventNames,
+  EventsMap,
+} from "@socket.io/component-emitter";
 
-// It seems to me, that only one arg functions are supported, as IoProvider does not spread the args in its listener.
-type Parameter<T extends (arg: any)=>any> = T extends (arg: infer P) => any ? P : never;
+// TODO: spread args in IoProvider and replace this with Parameters
+type Parameter<T extends (...args: any) => any> = T extends (
+  ...args: infer P
+) => any
+  ? P[0]
+  : never;
 
-function useSocketEvent<T extends unknown = any>(
+// TODO: change any to unknown in major version
+function useSocketEvent<T = any, EmitMessageCbReturnType = any>(
   event: string,
-  options?: UseSocketEventProps<T> & UseSocketOptions
-): UseSocketEventReturnType<T>;
+  options?: UseSocketEventOptions<T> & UseSocketOptions
+): UseSocketEventReturnType<T, any[], EmitMessageCbReturnType>;
 function useSocketEvent<
-    ListenEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
-    EmitEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
-    EventProps extends keyof ListenEvents = keyof ListenEvents
+  T = never,
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  EventKey extends EventNames<ListenEvents> = EventNames<ListenEvents>,
+  ListenMessageType = [T] extends [never]
+    ? Parameter<ListenEvents[EventKey]>
+    : T,
+  EmitMessageArgs extends any[] = Parameters<
+    EmitEvents[EventNames<EmitEvents>]
+  >,
+  //TODO: infer from last argument returntype(cb) of EmitEvents[EventKey]
+  // if last argument is a function then infer return type
+  // if last argument is not a function then infer void
+  EmitMessageCbReturnType = any
 >(
-    socket: SocketLike<Socket<ListenEvents, EmitEvents>>,
-    event: EventProps,
-    options?: UseSocketEventProps<Parameter<ListenEvents[EventProps]>>
-): UseSocketEventReturnType<Parameter<ListenEvents[EventProps]>>;
+  socket: SocketLike<Socket<ListenEvents, EmitEvents>>,
+  event: EventKey,
+  options?: UseSocketEventOptions<ListenMessageType>
+): UseSocketEventReturnType<
+  ListenMessageType,
+  EmitMessageArgs,
+  EmitMessageCbReturnType
+>;
 function useSocketEvent<
-    ListenEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
-    EmitEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
-    EventProps extends keyof ListenEvents = keyof ListenEvents
+  T = never,
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  EventKey extends EventNames<ListenEvents> = EventNames<ListenEvents>,
+  ListenMessageType = [T] extends [never]
+    ? Parameter<ListenEvents[EventKey]>
+    : T,
+  EmitMessageArgs extends any[] = Parameters<
+    EmitEvents[EventNames<EmitEvents>]
+  >,
+  //TODO: infer from last argument returntype(cb) of EmitEvents[EventKey]
+  // if last argument is a function then infer return type
+  // if last argument is not a function then infer void
+  EmitMessageCbReturnType = any
 >(
-    socket: SocketLike<Socket<ListenEvents, EmitEvents>> | string,
-    event: string | (EventProps & UseSocketOptions),
-    options?: UseSocketEventProps<Parameter<ListenEvents[EventProps]>>
-): UseSocketEventReturnType<Parameter<ListenEvents[EventProps]>> {
+  socket: EventKey | SocketLike<Socket<ListenEvents, EmitEvents>>,
+  event:
+    | EventKey
+    | (UseSocketEventOptions<ListenMessageType> & UseSocketOptions),
+  options?: UseSocketEventOptions<ListenMessageType>
+): UseSocketEventReturnType<
+  ListenMessageType,
+  EmitMessageArgs,
+  EmitMessageCbReturnType
+> {
   let enabled = true;
   if (typeof socket === "string") {
     const _options = event as
-      | (UseSocketEventProps<Parameter<ListenEvents[EventProps]>> & UseSocketOptions)
+      | (UseSocketEventOptions<ListenMessageType> & UseSocketOptions)
       | undefined;
     options = _options;
     enabled = _options?.enabled ?? true;
     event = socket;
-    socket = useSocket(
-      options as (EventProps & UseSocketOptions) | undefined
-    ).socket;
+    socket = useSocket(_options).socket;
   }
 
   let onMessage;
@@ -58,25 +98,33 @@ function useSocketEvent<
 
   const ioContext = useContext<IoContextInterface<SocketLike>>(IoContext);
   const { registerSharedListener, getConnection } = ioContext;
-  const connection = enabled ? getConnection(socket.namespaceKey) : null;
+  const connection = enabled
+    ? getConnection((socket as SocketLike).namespaceKey)
+    : null;
   const [, rerender] = useState({});
   const state = useRef<{
     socket: SocketLike;
     status: "connecting" | "connected" | "disconnected";
     error: Error | null;
-    lastMessage: Parameter<ListenEvents[EventProps]>;
+    lastMessage: ListenMessageType;
   }>({
     socket: connection?.socket || new SocketMock(),
     status: connection?.state.status || "disconnected",
     error: null,
-    lastMessage: connection?.state.lastMessage[event as string] as Parameter<ListenEvents[EventProps]>,
+    lastMessage: connection?.state.lastMessage[
+      event as string
+    ] as ListenMessageType,
   });
 
-  const sendMessage = <T extends unknown>(message: any) =>
-    new Promise<T>((resolve, _reject) => {
-      (socket as SocketLike).emit(event as string, message, (response: T) => {
-        resolve(response);
-      });
+  const sendMessage = (...message: EmitMessageArgs) =>
+    new Promise<EmitMessageCbReturnType>((resolve, _reject) => {
+      (socket as SocketLike).emit(
+        event as string,
+        ...message,
+        (response: EmitMessageCbReturnType) => {
+          resolve(response);
+        }
+      );
     });
 
   useEffect(() => {
