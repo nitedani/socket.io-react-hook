@@ -9,31 +9,43 @@ import {
   UseSocketOptions,
 } from "./types";
 import useSocket from "./useSocket";
+import type {Socket} from "socket.io-client";
+
+// It seems to me, that only one arg functions are supported, as IoProvider does not spread the args in its listener.
+type Parameter<T extends (arg: any)=>any> = T extends (arg: infer P) => any ? P : never;
 
 function useSocketEvent<T extends unknown = any>(
   event: string,
   options?: UseSocketEventProps<T> & UseSocketOptions
 ): UseSocketEventReturnType<T>;
-function useSocketEvent<T extends unknown = any>(
-  socket: SocketLike,
-  event: string,
-  options?: UseSocketEventProps<T>
-): UseSocketEventReturnType<T>;
-function useSocketEvent<T extends unknown = any>(
-  socket: SocketLike | string,
-  event?: string | (UseSocketEventProps<T> & UseSocketOptions),
-  options?: UseSocketEventProps<T>
-): UseSocketEventReturnType<T> {
+function useSocketEvent<
+    ListenEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
+    EmitEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
+    EventProps extends keyof ListenEvents = keyof ListenEvents
+>(
+    socket: SocketLike<Socket<ListenEvents, EmitEvents>>,
+    event: EventProps,
+    options?: UseSocketEventProps<Parameter<ListenEvents[EventProps]>>
+): UseSocketEventReturnType<Parameter<ListenEvents[EventProps]>>;
+function useSocketEvent<
+    ListenEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
+    EmitEvents extends Record<string, any> = Record<string, (...args: any[]) => void>,
+    EventProps extends keyof ListenEvents = keyof ListenEvents
+>(
+    socket: SocketLike<Socket<ListenEvents, EmitEvents>> | string,
+    event: string | (EventProps & UseSocketOptions),
+    options?: UseSocketEventProps<Parameter<ListenEvents[EventProps]>>
+): UseSocketEventReturnType<Parameter<ListenEvents[EventProps]>> {
   let enabled = true;
   if (typeof socket === "string") {
     const _options = event as
-      | (UseSocketEventProps<T> & UseSocketOptions)
+      | (UseSocketEventProps<Parameter<ListenEvents[EventProps]>> & UseSocketOptions)
       | undefined;
     options = _options;
     enabled = _options?.enabled ?? true;
     event = socket;
     socket = useSocket(
-      options as (UseSocketEventProps<T> & UseSocketOptions) | undefined
+      options as (EventProps & UseSocketOptions) | undefined
     ).socket;
   }
 
@@ -52,12 +64,12 @@ function useSocketEvent<T extends unknown = any>(
     socket: SocketLike;
     status: "connecting" | "connected" | "disconnected";
     error: Error | null;
-    lastMessage: T;
+    lastMessage: Parameter<ListenEvents[EventProps]>;
   }>({
     socket: connection?.socket || new SocketMock(),
     status: connection?.state.status || "disconnected",
     error: null,
-    lastMessage: connection?.state.lastMessage[event as string] as T,
+    lastMessage: connection?.state.lastMessage[event as string] as Parameter<ListenEvents[EventProps]>,
   });
 
   const sendMessage = <T extends unknown>(message: any) =>
