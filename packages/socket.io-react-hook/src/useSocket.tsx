@@ -55,7 +55,11 @@ function useSocket<
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
   };
-  const urlConfig = url(opts.namespace, opts.options?.path || "/socket.io");
+  const urlConfig = url(
+    opts.namespace,
+    opts.options?.path || "/socket.io",
+    opts.options?.port
+  );
   const connectionKey = urlConfig.id;
   const namespaceKey = `${connectionKey}${urlConfig.path}`;
 
@@ -110,7 +114,7 @@ function useSocket<
       };
     }
     return () => {};
-  }, [enabled]);
+  }, [enabled, namespaceKey]);
 
   return {
     socket: state.current.socket,

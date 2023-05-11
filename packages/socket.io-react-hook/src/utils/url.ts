@@ -36,12 +36,12 @@ type ParsedUrl = {
 export function url(
   uri: string | ParsedUrl,
   path: string = "",
-  loc?: Location
+  defaultPort?: number | string
 ): ParsedUrl {
   let obj = uri as ParsedUrl;
 
   // default to window.location
-  loc = loc || globalThis.location;
+  const loc = globalThis.location;
   if (null == uri) uri = loc.protocol + "//" + loc.host;
 
   // relative path support
@@ -68,7 +68,9 @@ export function url(
 
   // make sure we treat `localhost:80` and `localhost` equally
   if (!obj.port) {
-    if (/^(http|ws)$/.test(obj.protocol)) {
+    if (defaultPort) {
+      obj.port = String(defaultPort);
+    } else if (/^(http|ws)$/.test(obj.protocol)) {
       obj.port = "80";
     } else if (/^(http|ws)s$/.test(obj.protocol)) {
       obj.port = "443";
@@ -78,7 +80,7 @@ export function url(
   obj.path = obj.path || "/";
 
   const ipv6 = obj.host.indexOf(":") !== -1;
-  const host = ipv6 ? "[" + obj.host + "]" : obj.host;
+  const host = ipv6 ? "[" + obj.host + "]" : obj.host || "localhost";
 
   // define unique id
   obj.id = obj.protocol + "://" + host + ":" + obj.port + path;
