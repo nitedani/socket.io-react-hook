@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSocket, useSocketEvent } from "socket.io-react-hook";
 
 const Socket1 = () => {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true);
   const { socket } = useSocket({ path: "/api/socket", enabled });
   const { lastMessage } = useSocketEvent<string>(socket, "message", {
     onMessage: (message) => console.log(message),
