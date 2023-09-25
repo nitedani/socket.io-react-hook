@@ -1,6 +1,7 @@
 import type { EventsMap, DefaultEventsMap } from "@socket.io/component-emitter";
 import { Socket } from "socket.io-client";
 import { url } from "./utils/url";
+import { unique } from "./utils/hash";
 import IoContext from "./IoContext";
 import {
   IoContextInterface,
@@ -11,6 +12,7 @@ import {
 } from "./types";
 import SocketMock from "socket.io-mock";
 import { useContext, useEffect, useRef, useState } from "react";
+import stableHash from "stable-hash";
 
 function useSocket<
   ListenEvents extends EventsMap = DefaultEventsMap,
@@ -61,7 +63,9 @@ function useSocket<
     opts.options?.port
   );
   const connectionKey = urlConfig.id;
-  const namespaceKey = `${connectionKey}${urlConfig.path}`;
+  const namespaceKey = `${connectionKey}${urlConfig.path}${unique(
+    stableHash(opts.options)
+  )}`;
 
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
   const { createConnection, getConnection } =
@@ -88,7 +92,7 @@ function useSocket<
         socket: _socket,
         cleanup,
         subscribe,
-      } = createConnection(urlConfig, opts.options)!;
+      } = createConnection(namespaceKey, urlConfig, opts.options)!;
       state.current.socket = _socket;
 
       const unsubscribe = subscribe((newState) => {

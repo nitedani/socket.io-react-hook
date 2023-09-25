@@ -83,12 +83,14 @@ importers:
       rimraf: ^4.4.0
       socket.io-client: ^4.5.3
       socket.io-mock: ^1.3.2
+      stable-hash: ^0.0.3
       tsup: ^6.6.3
       typescript: ^4.6.4
     dependencies:
       parseuri: 0.0.6
       socket.io-client: 4.6.1
       socket.io-mock: 1.3.2
+      stable-hash: 0.0.3
     devDependencies:
       '@socket.io/component-emitter': 3.1.0
       '@types/react': 18.0.28
@@ -4393,6 +4395,10 @@ packages:
     dependencies:
       whatwg-url: 7.1.0
     dev: true
+
+  /stable-hash/0.0.3:
+    resolution: {integrity: sha512-c63fvNCQ7ip1wBfPv54MflMA5L6OE5J0p6Fg13IpKft4JAFoNal8+s/jtJ8PibrwqXm4onnbeQsADs8k0NQGUA==}
+    dev: false
 
   /stop-iteration-iterator/1.0.0:
     resolution: {integrity: sha512-iCGQj+0l0HOdZ2AEeBADlsRC+vsnDsZsbdSiH1yNSjcfKM7fdpCMfqAL/dwF5BLiw/XhRft/Wax6zQbhq2BcjQ==}

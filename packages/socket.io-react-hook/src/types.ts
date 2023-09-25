@@ -29,6 +29,7 @@ export type CreateConnectionFuncReturnType<T extends Socket = Socket> = {
 } & SocketState;
 
 export type CreateConnectionFunc<T extends Socket = Socket> = (
+  namespaceKey: string,
   urlConfig: ReturnType<typeof url>,
   options?: Partial<ManagerOptions & SocketOptions> | undefined
 ) => CreateConnectionFuncReturnType<T> | undefined;
