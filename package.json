@@ -1,11 +1,11 @@
 {
   "name": "socket.io-react-hook",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "turbo run build",
-    "release": "pnpm build && test-e2e && bumpp package.json packages/*/package.json examples/*/package.json && pnpm -r publish --access=public",
+    "release": "bumpp package.json packages/*/package.json examples/*/package.json && pnpm -r publish --access=public",
     "test": "test-e2e"
   },
   "devDependencies": {
