@@ -57,16 +57,27 @@ function useSocket<
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
   };
+
   const urlConfig = url(
     opts.namespace,
     opts.options?.path || "/socket.io",
     opts.options?.port
   );
   const connectionKey = urlConfig.id;
-  const namespaceKey = `${connectionKey}${urlConfig.path}${unique(
-    stableHash(opts.options)
-  )}`;
-
+  const hash = opts.options
+    ? unique(
+        stableHash(
+          Object.entries(opts.options).reduce((acc, [k, v]) => {
+            if (typeof v === "function") {
+              return acc;
+            }
+            acc[k] = v;
+            return acc;
+          }, {})
+        )
+      )
+    : "";
+  const namespaceKey = `${connectionKey}${urlConfig.path}${hash}`;
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
   const { createConnection, getConnection } =
     useContext<IoContextInterface<SocketType>>(IoContext);
