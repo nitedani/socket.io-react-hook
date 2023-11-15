@@ -35,8 +35,6 @@ const initRpcServer = (
       cb(socket);
     }
     socket.on(JOIN_ROOM, (room: string, ack) => {
-      console.log("aaa");
-
       socket.join(room);
       ack?.();
     });
