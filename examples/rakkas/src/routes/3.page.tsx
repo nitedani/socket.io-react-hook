@@ -13,7 +13,7 @@ export default function HomePage() {
 
   const [state, setState] = useSyncedState<Post>(null, {
     serverStore: {
-      set: ({ id, name }) =>
+      set: ({ name }) =>
         prisma.post.upsert({
           where: {
             id: postId,
