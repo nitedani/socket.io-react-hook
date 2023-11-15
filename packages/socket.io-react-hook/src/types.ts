@@ -30,6 +30,7 @@ export type CreateConnectionFuncReturnType<T extends Socket = Socket> = {
 } & SocketState;
 
 export type CreateConnectionFunc<T extends Socket = Socket> = (
+  namespaceKey: string,
   urlConfig: ReturnType<typeof url>,
   options?: Partial<ManagerOptions & SocketOptions> | undefined
 ) => CreateConnectionFuncReturnType<T> | undefined;
@@ -64,12 +65,16 @@ export type UseSocketReturnType<T extends Socket> = {
   connected: boolean;
   error: any;
 };
-export type UseSocketEventProps<T> = {
+export type UseSocketEventOptions<T> = {
   keepPrevious?: boolean;
   onMessage?: (message: T) => void;
 };
-export type UseSocketEventReturnType<T extends unknown> = {
-  sendMessage: (message: any) => Promise<T>;
+export type UseSocketEventReturnType<
+  T,
+  EmitMessageArgs extends any[] = any[],
+  R = any
+> = {
+  sendMessage: (...message: EmitMessageArgs) => Promise<R>;
   socket: SocketLike;
   status: "connecting" | "connected" | "disconnected";
   error: Error | null;

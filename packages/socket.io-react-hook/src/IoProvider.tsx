@@ -41,21 +41,20 @@ const IoProvider = function ({
   >({});
 
   const createConnection: CreateConnectionFunc<any> = (
+    namespaceKey,
     urlConfig,
     options = {}
   ) => {
-    const connectionKey = urlConfig.id;
-
-    if (!(connectionKey in connections.current)) {
-      connections.current[connectionKey] = 1;
+    if (!(namespaceKey in connections.current)) {
+      connections.current[namespaceKey] = 1;
     } else {
-      connections.current[connectionKey] += 1;
+      connections.current[namespaceKey] += 1;
     }
 
     const cleanup = () => {
-      if (--connections.current[connectionKey] === 0) {
+      if (--connections.current[namespaceKey] === 0) {
         const socketsToClose = Object.keys(sockets.current).filter((key) =>
-          key.includes(connectionKey)
+          key.includes(namespaceKey)
         );
 
         for (const key of socketsToClose) {
@@ -65,8 +64,6 @@ const IoProvider = function ({
         }
       }
     };
-
-    const namespaceKey = `${connectionKey}${urlConfig.path}`;
 
     // By default socket.io-client creates a new connection for the same namespace
     // The next line prevents that
@@ -145,22 +142,16 @@ const IoProvider = function ({
     const subscriptionKey = `${namespaceKey}${forEvent}`;
     const cleanup = () => {
       if (--eventSubscriptions.current[subscriptionKey] === 0) {
-        const subscriptionsToClose = Object.keys(
-          eventSubscriptions.current
-        ).filter((key) => key.includes(subscriptionKey));
-
-        for (const key of subscriptionsToClose) {
-          // when all useSocketEvent hooks unmount for a specific event,
-          // remove lastMessage to prevent showing stale messages on remount
-          delete eventSubscriptions.current[key];
-        }
+        delete eventSubscriptions.current[subscriptionKey];
+        if (sockets.current[namespaceKey])
+          delete sockets.current[namespaceKey].state.lastMessage[forEvent];
       }
     };
 
     if (!(subscriptionKey in eventSubscriptions.current)) {
-      connections.current[subscriptionKey] = 1;
+      eventSubscriptions.current[subscriptionKey] = 1;
     } else {
-      connections.current[subscriptionKey] += 1;
+      eventSubscriptions.current[subscriptionKey] += 1;
     }
 
     return () => cleanup();

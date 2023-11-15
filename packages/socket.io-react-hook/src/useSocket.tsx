@@ -1,6 +1,7 @@
 import type { EventsMap, DefaultEventsMap } from "@socket.io/component-emitter";
 import { Socket } from "socket.io-client";
 import { url } from "./utils/url";
+import { unique } from "./utils/hash";
 import IoContext from "./IoContext";
 import {
   IoContextInterface,
@@ -11,6 +12,7 @@ import {
 } from "./types";
 import SocketMock from "socket.io-mock";
 import { useContext, useEffect, useRef, useState } from "react";
+import stableHash from "stable-hash";
 
 function useSocket<
   ListenEvents extends EventsMap = DefaultEventsMap,
@@ -55,10 +57,27 @@ function useSocket<
     namespace: typeof namespace === "string" ? namespace : "",
     options: typeof namespace === "object" ? namespace : options,
   };
-  const urlConfig = url(opts.namespace, opts.options?.path || "/socket.io");
-  const connectionKey = urlConfig.id;
-  const namespaceKey = `${connectionKey}${urlConfig.path}`;
 
+  const urlConfig = url(
+    opts.namespace,
+    opts.options?.path || "/socket.io",
+    opts.options?.port
+  );
+  const connectionKey = urlConfig.id;
+  const hash = opts.options
+    ? unique(
+        stableHash(
+          Object.entries(opts.options).reduce((acc, [k, v]) => {
+            if (typeof v === "function") {
+              return acc;
+            }
+            acc[k] = v;
+            return acc;
+          }, {})
+        )
+      )
+    : "";
+  const namespaceKey = `${connectionKey}${urlConfig.path}${hash}`;
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
   const { createConnection, getConnection } =
     useContext<IoContextInterface<SocketType>>(IoContext);
@@ -84,7 +103,7 @@ function useSocket<
         socket: _socket,
         cleanup,
         subscribe,
-      } = createConnection(urlConfig, opts.options)!;
+      } = createConnection(namespaceKey, urlConfig, opts.options)!;
       state.current.socket = _socket;
 
       const unsubscribe = subscribe((newState) => {
@@ -110,7 +129,7 @@ function useSocket<
       };
     }
     return () => {};
-  }, [enabled]);
+  }, [enabled, namespaceKey]);
 
   return {
     socket: state.current.socket,
