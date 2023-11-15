@@ -37,7 +37,6 @@ export default function HomePage() {
 
   const onSetState = () => {
     setState({
-      ...state,
       name: ref.current?.value ?? "No name",
     });
   };
