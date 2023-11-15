@@ -134,6 +134,8 @@ function useSocketEvent<
       event as string
     );
     const unsubscribe = connection.subscribe((newState, _event) => {
+      console.log(_event);
+      
       let changed = false;
 
       if (state.current.status !== newState.status) {

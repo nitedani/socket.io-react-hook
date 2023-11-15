@@ -19,7 +19,10 @@ const createEmitter =
   (event: string, ...args: any[]) =>
     socket.emitWithAck(EMIT, event, room, ...args);
 
-const initRpcServer = (server: CustomServer) => {
+const initRpcServer = (
+  server: CustomServer,
+  cb?: (serverBoundSocket: Socket) => void
+) => {
   // @ts-ignore
   if (server.__listener) {
     // @ts-ignore
@@ -28,7 +31,12 @@ const initRpcServer = (server: CustomServer) => {
 
   // @ts-ignore
   server.__listener = (socket: Socket) => {
+    if (cb) {
+      cb(socket);
+    }
     socket.on(JOIN_ROOM, (room: string, ack) => {
+      console.log("aaa");
+
       socket.join(room);
       ack?.();
     });
@@ -65,7 +73,7 @@ const initRpcServer = (server: CustomServer) => {
   server.on("connection", server.__listener);
 };
 
-export const useSocketServer = () => {
+export const useSocketServer = (cb?: (serverBoundSocket: Socket) => void) => {
   const { socket } = useSocket();
   const ioContext = useContext<IoContextInterface<SocketLike>>(IoContext);
   const server = ioContext.server;
@@ -78,6 +86,21 @@ export const useSocketServer = () => {
     server.initializedRpc = true;
     initializedDev = true;
     initRpcServer(server);
+  }
+
+  if (cb && server) {
+    const listener = (socket: Socket) => {
+      socket.once("disconnect", () => {
+        socket.offAny();
+      });
+      cb(socket);
+    };
+
+    server.on("connection", (socket) => {
+      if (socket.handshake.query["rpc-prefix"] === ioContext.rpcPrefix) {
+        listener(socket);
+      }
+    });
   }
 
   const operations = {
@@ -97,7 +120,7 @@ export const useSocketServer = () => {
     },
   };
 
-  return { ...operations, socket };
+  return { ...operations, socket, server };
 };
 
 export default useSocketServer;

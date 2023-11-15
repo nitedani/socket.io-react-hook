@@ -10,6 +10,13 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "types": ["vite/client"]
+    "types": [
+      "vite/client"
+    ],
+    "plugins": [
+      {
+        "name": "vite-plugin-iso-import"
+      }
+    ]
   }
 }

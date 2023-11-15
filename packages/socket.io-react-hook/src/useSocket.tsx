@@ -42,7 +42,7 @@ function useSocket<
   >
 >(
   namespace?: string | UseSocketOptions,
-  options?: UseSocketOptions
+  options: UseSocketOptions = {}
 ): UseSocketReturnType<SocketType> {
   const isServer = typeof window === "undefined";
   if (isServer) {
@@ -77,6 +77,9 @@ function useSocket<
         )
       )
     : "";
+
+    console.log(hash);
+    
   const namespaceKey = `${connectionKey}${urlConfig.path}${hash}`;
   const enabled = opts.options?.enabled === undefined || opts.options.enabled;
   const { createConnection, getConnection } =

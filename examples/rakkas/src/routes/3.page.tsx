@@ -1,40 +1,57 @@
-import { useRef, useState } from "react";
-import { useSocketEvent, useSocketServer } from "socket.io-react-hook";
+import { Post, PrismaClient } from "@prisma/client?server";
+import { useRequestContext } from "rakkasjs";
+import { useRef } from "react";
+import { useSyncedState } from "socket.io-react-hook";
+
+const prisma = import.meta.env.SSR ? new PrismaClient() : {};
 
 export default function HomePage() {
   const ref = useRef<HTMLInputElement>(null);
-  const [messages, setMessages] = useState<string[]>([]);
-  const { join, leave, to, socket } = useSocketServer();
+  const ctx = useRequestContext();
 
-  useSocketEvent<string>("message", {
-    onMessage: (message) => setMessages((messages) => [...messages, message]),
+  const postId = "test";
+
+  const [state, setState] = useSyncedState<Post>(null, {
+    serverStore: {
+      set: ({ id, name }) =>
+        prisma.post.upsert({
+          where: {
+            id: postId,
+          },
+          create: {
+            id: postId,
+            name,
+          },
+          update: {
+            name,
+          },
+        }),
+      get: () =>
+        prisma.post.findFirst({
+          where: {
+            id: postId,
+          },
+        }),
+    },
   });
 
-  const handleJoinRoom = async () => {
-    await join("1");
-    to("1").broadcast("message", socket.id + "Joined room 1");
-  };
-  const handleLeaveRoom = async () => {
-    await leave("1");
-    to("1").broadcast("message", socket.id + "Left room 1");
-  };
-
-  const handleSendMessage = () => {
-    to("1").broadcast(
-      "message",
-      socket.id + (ref.current?.value || "Empty message")
-    );
+  const onSetState = () => {
+    setState({
+      ...state,
+      name: ref.current?.value ?? "No name",
+    });
   };
 
   return (
     <div>
-      <button onClick={handleSendMessage}>Send to room 1</button>
-      <button onClick={handleJoinRoom}>Join Room 1</button>
-      <button onClick={handleLeaveRoom}>Leave Room 1</button>
+      <button onClick={onSetState}>Send state</button>
       <input type="text" ref={ref} />
-      {messages.map((message, i) => (
-        <div key={i}>{message}</div>
-      ))}
+      {state && (
+        <div>
+          <div>{state.id}</div>
+          <div>{state.name}</div>
+        </div>
+      )}
     </div>
   );
 }
