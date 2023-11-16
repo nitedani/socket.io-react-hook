@@ -93,10 +93,12 @@ const IoProvider = function ({ children }: React.PropsWithChildren<{}>) {
       },
     });
 
-    socket.on("error", (error) => {
+    const handleError = (error) => {
       sockets.current[namespaceKey].state.error = error;
       sockets.current[namespaceKey].notify("error");
-    });
+    };
+    socket.on("error", handleError);
+    socket.on("connect_error", handleError);
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
