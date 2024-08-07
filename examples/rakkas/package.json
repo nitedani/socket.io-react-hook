@@ -29,5 +29,5 @@
     "socket.io": "^4.7.5",
     "socket.io-react-hook": "^2.4.4"
   },
-  "version": "2.4.4"
+  "version": "2.4.5"
 }
