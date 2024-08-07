@@ -11,10 +11,16 @@
   "devDependencies": {
     "@brillout/test-e2e": "^0.1.22",
     "bumpp": "^8.2.1",
-    "turbo": "^1.4.6"
+    "turbo": "^1.13.4"
   },
   "engines": {},
   "dependencies": {
     "kill-port": "^2.0.1"
+  },
+  "packageManager": "pnpm@9.6.0",
+  "pnpm": {
+    "overrides": {
+      "socket.io-react-hook": "link:./packages/socket.io-react-hook/"
+    }
   }
 }
