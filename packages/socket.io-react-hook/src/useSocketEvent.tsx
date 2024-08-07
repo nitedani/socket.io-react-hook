@@ -145,7 +145,10 @@ function useSocketEvent<
         changed = true;
       }
 
-      if (_event === "message") {
+      if (
+        _event === "message" &&
+        state.current.lastMessage !== newState.lastMessage[event as string]
+      ) {
         const lastMessage = newState.lastMessage[event as string];
         state.current.lastMessage = lastMessage;
         if (onMessage) {
